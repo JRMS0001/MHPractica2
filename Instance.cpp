@@ -174,7 +174,33 @@ int * Instance::AGEPMX(int * cost,ofstream &outfile ){
 		//Mutation
 		Element firstSon=sons.at(0);
 		Element secondSon=sons.at(1);
-		//TODO
+		for(int i=0; i< POP_SIZE; i++){
+			for (int j=0; j< matrixSize;j++){
+				double random=rand() / (double) RAND_MAX;
+				if(random < 0.001*(double)matrixSize){
+					random = rand() % matrixSize;
+					//Swapping elements in the solution
+					int swap  = population.at(i).solution[j];
+					population.at(i).solution[j]=  population.at(i).solution[random];
+					population.at(i).solution[random]=swap;
+					//Factorization
+					if(population.at(i).eval==false){
+						population.at(i).Evaluate();
+					}else{
+						int mutationCost = population.at(i).cost;
+
+						for(int k=0;k<matrixSize;k++){
+								if(k!=i && k!=j){
+									mutationCost+=flowMatrix[j][k] * (distanceMatrix[population.at(i).solution[random]-1][population.at(i).solution[k]-1] - distanceMatrix[population.at(i).solution[j]-1][population.at(i).solution[k]-1]);
+									mutationCost+=flowMatrix[random][k] * (distanceMatrix[population.at(i).solution[j]-1][population.at(i).solution[k]-1] - distanceMatrix[population.at(i).solution[random]-1][population.at(i).solution[k]-1]);
+									mutationCost+=flowMatrix[k][j] * (distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[random]-1] - distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[j]-1]);
+									mutationCost+=flowMatrix[k][random] * (distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[j]-1] - distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[random]-1]);
+								}
+							}
+					}
+				}
+			}
+		}
 
 		//Replacement
 		std::sort (population.begin(),population.end(), comparator);
