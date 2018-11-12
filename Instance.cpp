@@ -7,7 +7,7 @@
 
 #include "Instance.h"
 
-Instance::Instance(string path) {
+std::Instance::Instance(string path) {
 	string line;
 		ifstream myfile(path);
 		matrixSize=0;
@@ -99,7 +99,7 @@ Instance::Instance(string path) {
 }
 
 
-void Instance::display(){
+void std::Instance::display(){
 	if (matrixSize!=0){
 		for (int i = 0; i < matrixSize; i++) {
 			for (int j = 0; j < matrixSize; j++) {
@@ -117,12 +117,12 @@ void Instance::display(){
 		}
 	}
 }
-bool comparator(Element i, Element j){
+bool std::Instance::comparator(Element i, Element j){
 	return i.cost<j.cost;
 }
 
-int * Instance::AGEPMX(int * cost,ofstream &outfile ){
-	std::vector<Element> population = new std::vector();
+int * std::Instance::AGEPMX(int * cost,ofstream &outfile ){
+	std::vector<std::Element> population;
 
 	//Generate the random population
 	int* unitAndLocationAssociation = new int[matrixSize];
@@ -136,9 +136,9 @@ int * Instance::AGEPMX(int * cost,ofstream &outfile ){
 		random_shuffle(&unitAndLocationAssociation[0],&unitAndLocationAssociation[matrixSize]);
 
 
-		Element el = new Element(unitAndLocationAssociation,matrixSize,this);
-		el.Evaluate();
-		population.push_back(el);
+		std::Element *el = new std::Element(unitAndLocationAssociation,matrixSize,this);
+		el->Evaluate();
+		population.push_back(*el);
 	}
 	int it=1;
 	while(it < 50000){
@@ -148,8 +148,8 @@ int * Instance::AGEPMX(int * cost,ofstream &outfile ){
 		int r =rand() % POP_SIZE;
 		int s =rand() % POP_SIZE;
 
-		Element firstFather;
-		Element secondFather;
+		std::Element firstFather;
+		std::Element secondFather;
 		if(population.at(r).cost < population.at(s).cost ){
 			firstFather = population.at(r);
 		}
@@ -167,13 +167,13 @@ int * Instance::AGEPMX(int * cost,ofstream &outfile ){
 			secondFather = population.at(s);
 		}
 
-		std::vector<Element> sons;
+		std::vector<std::Element> sons;
 		//Crossover
 		sons=PMXCrossover(firstFather, secondFather);
 
 		//Mutation
-		Element firstSon=sons.at(0);
-		Element secondSon=sons.at(1);
+		std::Element firstSon=sons.at(0);
+		std::Element secondSon=sons.at(1);
 		for(int i=0; i< POP_SIZE; i++){
 			for (int j=0; j< matrixSize;j++){
 				double random=rand() / (double) RAND_MAX;
@@ -181,8 +181,8 @@ int * Instance::AGEPMX(int * cost,ofstream &outfile ){
 					random = rand() % matrixSize;
 					//Swapping elements in the solution
 					int swap  = population.at(i).solution[j];
-					population.at(i).solution[j]=  population.at(i).solution[random];
-					population.at(i).solution[random]=swap;
+					population.at(i).solution[j]=  population.at(i).solution[(int)random];
+					population.at(i).solution[(int)random]=swap;
 					//Factorization
 					if(population.at(i).eval==false){
 						population.at(i).Evaluate();
@@ -190,20 +190,23 @@ int * Instance::AGEPMX(int * cost,ofstream &outfile ){
 						int mutationCost = population.at(i).cost;
 
 						for(int k=0;k<matrixSize;k++){
-								if(k!=i && k!=j){
-									mutationCost+=flowMatrix[j][k] * (distanceMatrix[population.at(i).solution[random]-1][population.at(i).solution[k]-1] - distanceMatrix[population.at(i).solution[j]-1][population.at(i).solution[k]-1]);
-									mutationCost+=flowMatrix[random][k] * (distanceMatrix[population.at(i).solution[j]-1][population.at(i).solution[k]-1] - distanceMatrix[population.at(i).solution[random]-1][population.at(i).solution[k]-1]);
-									mutationCost+=flowMatrix[k][j] * (distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[random]-1] - distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[j]-1]);
-									mutationCost+=flowMatrix[k][random] * (distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[j]-1] - distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[random]-1]);
-								}
+							if(k!=j && k!=random){
+								mutationCost+=flowMatrix[j][k] * (distanceMatrix[population.at(i).solution[(int)random]-1][population.at(i).solution[k]-1] - distanceMatrix[population.at(i).solution[j]-1][population.at(i).solution[k]-1]);
+								mutationCost+=flowMatrix[(int)random][k] * (distanceMatrix[population.at(i).solution[j]-1][population.at(i).solution[k]-1] - distanceMatrix[population.at(i).solution[(int)random]-1][population.at(i).solution[k]-1]);
+								mutationCost+=flowMatrix[k][j] * (distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[(int)random]-1] - distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[j]-1]);
+								mutationCost+=flowMatrix[k][(int)random] * (distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[j]-1] - distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[(int)random]-1]);
 							}
+						}
+						population.at(i).cost = mutationCost;
+						population.at(i).eval=true;
 					}
+					it++;
 				}
 			}
 		}
 
 		//Replacement
-		std::sort (population.begin(),population.end(), comparator);
+		std::sort (population.begin(),population.end(),comparator);
 		Element worst1 = population.at(POP_SIZE-2);
 		Element worst2 = population.at(POP_SIZE-1);
 		if(firstSon.cost< worst2.cost){
@@ -223,13 +226,17 @@ int * Instance::AGEPMX(int * cost,ofstream &outfile ){
 				population.at(POP_SIZE-1)= secondSon;
 			}
 		}
-
 	}
+	//Return the best element
+	std::sort (population.begin(),population.end(), comparator);
+	*cost= population.at(0).cost;
+	return population.at(0).solution;
+
 }
 
-std::vector<Element> Instance::PMXCrossover(Element first, Element second){
+std::vector<std::Element> std::Instance::PMXCrossover(Element first, Element second){
 	//TODO
-	std::vector sons= new std::vector();
+	std::vector<std::Element>sons;
 
 	sons.push_back(first);
 	sons.push_back(second);
@@ -237,11 +244,11 @@ std::vector<Element> Instance::PMXCrossover(Element first, Element second){
 	return sons;
 }
 
-Instance::~Instance() {
+std::Instance::~Instance() {
 	// TODO Auto-generated destructor stub
 }
 
-size_t Instance::split(const std::string &txt, std::vector<std::string> &strs, char ch)
+size_t std::Instance::split(const std::string &txt, std::vector<std::string> &strs, char ch)
 {
 	size_t pos = txt.find(ch);
 	size_t initialPos = 0;

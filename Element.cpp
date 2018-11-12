@@ -9,7 +9,15 @@
 
 namespace std {
 
-Element::Element(int* solution,int size, Instance ins) {
+std::Element::Element(){
+	size=0;
+	cost=0;
+	this->solution=NULL;
+	eval=false;
+	ins=NULL;
+}
+
+std::Element::Element(int* solution,int size, std::Instance * ins) {
 	this->cost = 0;
 	this->size = size;
 	this->solution= new int[size];
@@ -21,19 +29,19 @@ Element::Element(int* solution,int size, Instance ins) {
 
 }
 
-void Element::Evaluate(){
+void std::Element::Evaluate(){
 	//Calculation of the cost of the generated solution
 	cost=0;
 	for(int i=0;i<size;i++){
 		for(int j=0;j<size;j++){
 			if(i!=j)
-				cost+=ins.flowMatrix[i][j] * ins.distanceMatrix[solution[i]-1][solution[j]-1];
+				cost+=ins->flowMatrix[i][j] * ins->distanceMatrix[solution[i]-1][solution[j]-1];
 		}
 	}
 	eval=true;
 }
 
-Element::~Element() {
+std::Element::~Element() {
 	// TODO Auto-generated destructor stub
 }
 
