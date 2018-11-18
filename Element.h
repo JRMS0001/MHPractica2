@@ -1,10 +1,3 @@
-/*
- * Element.h
- *
- *  Created on: Nov 11, 2018
- *      Author: melthalas
- */
-
 #ifndef ELEMENT_H_
 #define ELEMENT_H_
 

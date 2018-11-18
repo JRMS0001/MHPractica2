@@ -1,10 +1,3 @@
-/*
- * Instance.cpp
- *
- *  Created on: Oct 1, 2018
- *      Author: melthalas
- */
-
 #include "Instance.h"
 
 std::Instance::Instance(string path) {
@@ -167,16 +160,27 @@ int * std::Instance::AGEPMX(int * cost,ofstream &outfile ){
 			secondFather = population.at(s);
 		}
 
-		std::vector<std::Element> sons;
 		//Crossover
-		sons=PMXCrossover(firstFather, secondFather);
+		std::vector<Element> sons;
+		int* son1;
+		int* son2;
+		int intervalBegining = 2;
+		int intervalEnd = 4;
+
+		// TODO : calculate probabilityCrossover (if yes -> crossover -> son, if no -> keep the first parent)
+		/*
+		son1 = PMXCrossover(father[], mother[], intervalBegining, intervalEnd);
+		son2 = PMXCrossover(mother[], father[], intervalBegining, intervalEnd);
+		*/
+		son1 = PMXCrossover(firstFather.solution, secondFather.solution, intervalBegining, intervalEnd);
+		son2 = PMXCrossover(secondFather.solution, firstFather.solution, intervalBegining, intervalEnd);
 
 		//Mutation
 		std::Element firstSon=sons.at(0);
 		std::Element secondSon=sons.at(1);
 		for(int i=0; i< POP_SIZE; i++){
 			for (int j=0; j< matrixSize;j++){
-				double random=rand() / (double) RAND_MAX;
+				double random=rand() / (double) RAND_MAX; // between 0 and 1
 				if(random < 0.001*(double)matrixSize){
 					random = rand() % matrixSize;
 					//Swapping elements in the solution
@@ -234,15 +238,164 @@ int * std::Instance::AGEPMX(int * cost,ofstream &outfile ){
 
 }
 
-std::vector<std::Element> std::Instance::PMXCrossover(Element first, Element second){
-	//TODO
-	std::vector<std::Element>sons;
 
-	sons.push_back(first);
-	sons.push_back(second);
+int* std::Instance::OXCrossover(int* father, int* mother, int intervalBegining, int intervalEnd) {
 
-	return sons;
+	int intervalSize = intervalEnd - intervalBegining;
+	if (1 < intervalSize && intervalSize < matrixSize - 2) {
+
+		/* VARIABLES */
+		int* son;
+		std::vector<int> fatherIntervalValues;
+		std::vector<int> motherSortedValues;
+		bool* motherMask = new bool[matrixSize];
+		// Initializing mother mask
+		for (int i = 0; i < matrixSize; i++) {
+			motherMask[i] = 0;
+		}
+
+		/* VALUES FROM FATHER TO SON */
+		for (int i = intervalBegining; i < intervalEnd; i++) {
+			son[i] = father[i];
+			fatherIntervalValues.push_back(father[i]);
+		}
+
+		/* VALUES FROM MOTHER TO SON */
+
+		// Fill in mother mask
+		for (int value : fatherIntervalValues) {
+			for (int i = 0; i < matrixSize; i++) {
+				if (value == mother[i]) {
+					motherMask[i] = 1;
+					break;
+				}
+			}
+		}
+
+		// Taking (and sorting) values from mother
+		for (int i = intervalEnd; i < matrixSize; i++) {
+			if (motherMask[i] == 0) {
+				motherSortedValues.push_back(mother[i]);
+			}
+		}
+		for (int i = 0; i < intervalEnd; i++) {
+			if (motherMask[i] == 0) {
+				motherSortedValues.push_back(mother[i]);
+			}
+		}
+
+		// Fill in son
+		int iterationCounter = -1;
+		for (int i = intervalEnd; i < matrixSize; i++) {
+			son[i] = motherSortedValues[iterationCounter];
+			iterationCounter++;
+		}
+		for (int i = 0; i < intervalBegining; i++) {
+			son[i] = motherSortedValues[iterationCounter];
+			iterationCounter++;
+		}
+		
+		return son;
+
+	}
+	else {
+		return NULL;
+	}
 }
+
+int* std::Instance::PMXCrossover(int* father, int* mother, int intervalBegining, int intervalEnd){
+
+	int intervalSize = intervalEnd - intervalBegining;
+	if (1 < intervalSize && intervalSize < matrixSize - 2) {
+
+		/* VARIABLES */
+		int* son;
+		bool* motherMask = new bool[matrixSize];
+		// Initializing mother mask
+		for (int i = 0; i < matrixSize; i++) {
+			motherMask[i] = 0;
+		}
+
+		/* VALUES COPIED AT THE SAME PLACE FROM FATHER TO SON */
+		for (int i = intervalBegining; i < intervalEnd; i++) {
+			son[i] = father[i];
+		}
+
+		/* VALUES COPIED FROM MOTHER TO SON */
+
+		// Outside the father interval (on the left)
+		for (int indexFather = 0; indexFather < intervalBegining; indexFather++) {
+			// Outside the mother interval (on the left)
+			for (int indexMother = 0; indexMother < intervalBegining; indexMother++) {
+				if (father[indexFather] == mother[indexMother]) {
+					son[indexMother] == mother[indexMother];
+					break;
+				}
+			}
+			// Outside the mother interval (on the right)
+			for (int indexMother = intervalEnd; indexMother < matrixSize; indexMother++) {
+				if (father[indexFather] == mother[indexMother]) {
+					son[indexMother] == mother[indexMother];
+					break;
+				}
+			}
+			// Inside the mother interval
+			for (int indexMother = intervalBegining; indexMother < intervalEnd; indexMother++) {
+				if (father[indexFather] == mother[indexMother]) {
+					int indexSon = indexMother;
+					while (intervalBegining <= indexSon && indexSon < intervalEnd) {
+						for (int i = 0; i < matrixSize; i++) {
+							if (father[indexSon] == mother[i]) {
+								indexSon = i;
+							}
+						}
+					}
+					son[indexSon] = mother[indexMother];
+					break;
+				}
+			}
+		}
+		// Outside the father interval (on the right)
+		for (int indexFather = intervalEnd; indexFather < matrixSize; indexFather++) {
+			// Outside the mother interval (on the left)
+			for (int indexMother = 0; indexMother < intervalBegining; indexMother++) {
+				if (father[indexFather] == mother[indexMother]) {
+					son[indexMother] == mother[indexMother];
+					break;
+				}
+			}
+			// Outside the mother interval (on the right)
+			for (int indexMother = intervalEnd; indexMother < matrixSize; indexMother++) {
+				if (father[indexFather] == mother[indexMother]) {
+					son[indexMother] == mother[indexMother];
+					break;
+				}
+			}
+			// Inside the mother interval
+			for (int indexMother = intervalBegining; indexMother < intervalEnd; indexMother++) {
+				if (father[indexFather] == mother[indexMother]) {
+					int indexSon = indexMother;
+					while (intervalBegining <= indexSon && indexSon < intervalEnd) {
+						for (int i = 0; i < matrixSize; i++) {
+							if (father[indexSon] == mother[i]) {
+								indexSon = i;
+							}
+						}
+					}
+					son[indexSon] = mother[indexMother];
+					break;
+				}
+			}
+		}
+
+		return son;
+
+	}
+	else {
+		return NULL;
+	}
+}
+
 
 std::Instance::~Instance() {
 	// TODO Auto-generated destructor stub
@@ -264,6 +417,5 @@ size_t std::Instance::split(const std::string &txt, std::vector<std::string> &st
 
 	// Add the last one
 	strs.push_back(txt.substr(initialPos, std::min(pos, txt.size()) - initialPos + 1));
-
 	return strs.size();
 }

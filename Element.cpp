@@ -1,10 +1,3 @@
-/*
- * Element.cpp
- *
- *  Created on: Nov 11, 2018
- *      Author: melthalas
- */
-
 #include "Element.h"
 
 namespace std {

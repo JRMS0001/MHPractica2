@@ -1,10 +1,3 @@
-/*
- * Instance.h
- *
- *  Created on: Oct 1, 2018
- *      Author: melthalas
- */
-
 #ifndef INSTANCE_H_
 #define INSTANCE_H_
 
@@ -32,8 +25,11 @@ public:
 	Instance(string path);
 	void display();
 	int * AGEPMX(int * cost,ofstream &outfile );
-	std::vector<Element> PMXCrossover(Element first,Element second);
-	std::vector<Element> OXCrossover(Element first, Element second);
+
+	// Interval : [ intervalBegining ; intervalEnding [
+	int* PMXCrossover(int* father, int* mother, int intervalBegining, int intervalEnding);
+	int* OXCrossover(int* father, int* mother, int intervalBegining, int intervalEnding);
+
 	size_t split(const std::string &txt, std::vector<std::string> &strs, char ch);
 	virtual ~Instance();
 };
