@@ -1,16 +1,13 @@
 #include "Element.h"
 
-namespace std {
-
-std::Element::Element(){
+Element::Element(){
 	size=0;
 	cost=0;
 	this->solution=NULL;
 	eval=false;
-	ins=NULL;
 }
 
-std::Element::Element(int* solution,int size, std::Instance * ins) {
+Element::Element(int* solution,int size) {
 	this->cost = 0;
 	this->size = size;
 	this->solution= new int[size];
@@ -18,24 +15,23 @@ std::Element::Element(int* solution,int size, std::Instance * ins) {
 		this->solution[i]= solution[i];
 	}
 	eval=false;
-	this->ins=ins;
-
 }
 
-void std::Element::Evaluate(){
+void Element::Evaluate(){
 	//Calculation of the cost of the generated solution
+	int** flowMatrix = FileReader::getInstance()->getFlowMatrix();
+	int** distanceMatrix = FileReader::getInstance()->getDistanceMatrix();
+
 	cost=0;
 	for(int i=0;i<size;i++){
 		for(int j=0;j<size;j++){
 			if(i!=j)
-				cost+=ins->flowMatrix[i][j] * ins->distanceMatrix[solution[i]-1][solution[j]-1];
+				cost += flowMatrix[i][j] * distanceMatrix[solution[i]-1][solution[j]-1];
 		}
 	}
 	eval=true;
 }
 
-std::Element::~Element() {
+Element::~Element() {
 	// TODO Auto-generated destructor stub
 }
-
-} /* namespace std */

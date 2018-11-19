@@ -1,121 +1,21 @@
 #include "Instance.h"
 
-std::Instance::Instance(string path) {
-	string line;
-		ifstream myfile(path);
-		matrixSize=0;
-		if (myfile.is_open())
-		{
-
-			// Getting the matrix size
-			getline(myfile, line);
-			matrixSize = std::stoi(line);
-
-			// Declaring the matrixes
-			flowMatrix = new int*[matrixSize]; //col
-			for (int i = 0; i < matrixSize; ++i)
-				flowMatrix[i] = new int[matrixSize]; //row
-
-			distanceMatrix = new int*[matrixSize]; //col
-			for (int i = 0; i < matrixSize; ++i)
-				distanceMatrix[i] = new int[matrixSize]; //row
-
-			// Filling the matrixes in
-			int lineNumber = 2;
-			while (getline(myfile, line))
-			{
-				// Flow matrix
-				if (3 <= lineNumber && lineNumber < 3 + matrixSize) {
-					int i = 0;
-					do {
-						std::vector<std::string> v;
-						v.clear();
-						split(line, v, ' ');
-
-						// Clearing blank data (due to double spaces)
-						std::vector<std::string> valuesFlow;
-						valuesFlow.clear();
-						for (int j = 0; j < v.size(); j++) {
-							if (!(v[j] == "")) {
-								valuesFlow.push_back(v[j]);
-							}
-						}
-						for (int j = 0; j < matrixSize; j++) {
-							if(valuesFlow.size()!=0)
-								flowMatrix[i][j] = std::stoi(valuesFlow[j]);
-						}
-
-						// New line
-						getline(myfile, line);
-						lineNumber++;
-						i++;
-					} while (i < matrixSize);
-				}
-
-				// Distance matrix
-				if (4 + matrixSize <= lineNumber && lineNumber < 4 + matrixSize + matrixSize) {
-					int i = 0;
-					do {
-						std::vector<std::string> v;
-						v.clear();
-						split(line, v, ' ');
-
-						// Clearing blank data (due to double spaces)
-						std::vector<std::string> valuesDistances;
-						valuesDistances.clear();
-						for (int j = 0; j < v.size(); j++) {
-							if (!(v[j] == "")) {
-								valuesDistances.push_back(v[j]);
-							}
-						}
-						for (int j = 0; j < matrixSize; j++) {
-							if(valuesDistances.size()!=0)
-								distanceMatrix[i][j] = std::stoi(valuesDistances[j]);
-						}
-
-						// New line
-						getline(myfile, line);
-						lineNumber++;
-						i++;
-					} while (i < matrixSize);
-				}
-
-				lineNumber++;
-
-			}
-			myfile.close();
-
-		}
-		else{
-			cout << "Unable to open file";
-		}
+Instance::Instance(std::string path) {
+	FileReader::getInstance()->readMatrixFromDataFile(path);
+	flowMatrix = FileReader::getInstance()->getFlowMatrix();
+	distanceMatrix = FileReader::getInstance()->getDistanceMatrix();
+	matrixSize = FileReader::getInstance()->getMatrixSize();
 }
 
-
-void std::Instance::display(){
-	if (matrixSize!=0){
-		for (int i = 0; i < matrixSize; i++) {
-			for (int j = 0; j < matrixSize; j++) {
-				cout << " " << flowMatrix[i][j];
-			}
-			cout << endl;
-	}
-
-		cout << endl;
-		for (int i = 0; i < matrixSize; i++) {
-			for (int j = 0; j < matrixSize; j++) {
-				cout << " " << distanceMatrix[i][j];
-			}
-			cout << endl;
-		}
-	}
+Instance::~Instance() {
 }
-bool std::Instance::comparator(Element i, Element j){
+
+bool Instance::comparator(Element i, Element j){
 	return i.cost<j.cost;
 }
 
-int * std::Instance::AGEPMX(int * cost,ofstream &outfile ){
-	std::vector<std::Element> population;
+int * Instance::AGEPMX(int * cost, std::ofstream &outfile ){
+	std::vector<Element> population;
 
 	//Generate the random population
 	int* unitAndLocationAssociation = new int[matrixSize];
@@ -126,10 +26,10 @@ int * std::Instance::AGEPMX(int * cost,ofstream &outfile ){
 
 			unitAndLocationAssociation[j]= j+1;
 		}
-		random_shuffle(&unitAndLocationAssociation[0],&unitAndLocationAssociation[matrixSize]);
+		std::random_shuffle(&unitAndLocationAssociation[0],&unitAndLocationAssociation[matrixSize]);
 
 
-		std::Element *el = new std::Element(unitAndLocationAssociation,matrixSize,this);
+		Element *el = new Element(unitAndLocationAssociation,matrixSize);
 		el->Evaluate();
 		population.push_back(*el);
 	}
@@ -141,8 +41,8 @@ int * std::Instance::AGEPMX(int * cost,ofstream &outfile ){
 		int r =rand() % POP_SIZE;
 		int s =rand() % POP_SIZE;
 
-		std::Element firstFather;
-		std::Element secondFather;
+		Element firstFather;
+		Element secondFather;
 		if(population.at(r).cost < population.at(s).cost ){
 			firstFather = population.at(r);
 		}
@@ -176,8 +76,8 @@ int * std::Instance::AGEPMX(int * cost,ofstream &outfile ){
 		son2 = PMXCrossover(secondFather.solution, firstFather.solution, intervalBegining, intervalEnd);
 
 		//Mutation
-		std::Element firstSon=sons.at(0);
-		std::Element secondSon=sons.at(1);
+		Element firstSon=sons.at(0);
+		Element secondSon=sons.at(1);
 		for(int i=0; i< POP_SIZE; i++){
 			for (int j=0; j< matrixSize;j++){
 				double random=rand() / (double) RAND_MAX; // between 0 and 1
@@ -239,7 +139,11 @@ int * std::Instance::AGEPMX(int * cost,ofstream &outfile ){
 }
 
 
-int* std::Instance::OXCrossover(int* father, int* mother, int intervalBegining, int intervalEnd) {
+
+
+/* OX AND PMX CROSSOVERS */
+
+int* Instance::OXCrossover(int* father, int* mother, int intervalBegining, int intervalEnd) {
 
 	int intervalSize = intervalEnd - intervalBegining;
 	if (1 < intervalSize && intervalSize < matrixSize - 2) {
@@ -303,7 +207,7 @@ int* std::Instance::OXCrossover(int* father, int* mother, int intervalBegining, 
 	}
 }
 
-int* std::Instance::PMXCrossover(int* father, int* mother, int intervalBegining, int intervalEnd){
+int* Instance::PMXCrossover(int* father, int* mother, int intervalBegining, int intervalEnd){
 
 	int intervalSize = intervalEnd - intervalBegining;
 	if (1 < intervalSize && intervalSize < matrixSize - 2) {
@@ -394,28 +298,4 @@ int* std::Instance::PMXCrossover(int* father, int* mother, int intervalBegining,
 	else {
 		return NULL;
 	}
-}
-
-
-std::Instance::~Instance() {
-	// TODO Auto-generated destructor stub
-}
-
-size_t std::Instance::split(const std::string &txt, std::vector<std::string> &strs, char ch)
-{
-	size_t pos = txt.find(ch);
-	size_t initialPos = 0;
-	strs.clear();
-
-	// Decompose statement
-	while (pos != std::string::npos) {
-		strs.push_back(txt.substr(initialPos, pos - initialPos));
-		initialPos = pos + 1;
-
-		pos = txt.find(ch, initialPos);
-	}
-
-	// Add the last one
-	strs.push_back(txt.substr(initialPos, std::min(pos, txt.size()) - initialPos + 1));
-	return strs.size();
 }

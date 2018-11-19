@@ -1,5 +1,7 @@
 #include <iostream>
+#include <time.h>
 #include "Instance.h"
+#include "FileReader.h"
 using namespace std;
 
 int main(int argc,const char * argv[]) {
@@ -34,7 +36,7 @@ int main(int argc,const char * argv[]) {
 			// AGE PMX
 			ofstream outfile;
 			std::vector<string> v;
-			instance->split(argv[itFile],v,'/');
+			FileReader::getInstance()->split(argv[itFile],v,'/');
 			outfile.open("logs/BF" + v.at(1) + seeds[i] + ".txt");
 			const clock_t bestFirst_begin_time = clock();
 			instance->AGEPMX(cost, outfile);

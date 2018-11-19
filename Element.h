@@ -1,11 +1,5 @@
-#ifndef ELEMENT_H_
-#define ELEMENT_H_
+#include "FileReader.h"
 
-#include "Instance.h"
-
-
-namespace std {
-class Instance;
 class Element {
 
 public:
@@ -13,14 +7,9 @@ public:
 	int cost;
 	int size;
 	bool eval;
-	Instance *ins;
 
 	Element();
-	Element(int* solution,int size, std::Instance *ins);
-	virtual ~Element();
+	Element(int* solution,int size);
+	~Element();
 	void Evaluate();
 };
-
-} /* namespace std */
-
-#endif /* ELEMENT_H_ */
