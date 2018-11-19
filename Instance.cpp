@@ -1,5 +1,10 @@
 #include "Instance.h"
 
+
+
+
+/* CONSTRUCTOR AND DESTRUCTOR */
+
 Instance::Instance(std::string path) {
 	FileReader::getInstance()->readMatrixFromDataFile(path);
 	flowMatrix = FileReader::getInstance()->getFlowMatrix();
@@ -10,37 +15,43 @@ Instance::Instance(std::string path) {
 Instance::~Instance() {
 }
 
-bool Instance::comparator(Element i, Element j){
-	return i.cost<j.cost;
-}
 
-int * Instance::AGEPMX(int * cost, std::ofstream &outfile ){
+
+
+/* GENETICAL ALGORITHMS */
+
+int* Instance::AGEPMX(int * cost, std::ofstream &outfile ){
 	std::vector<Element> population;
 
-	//Generate the random population
+	// Generate the random population
 	int* unitAndLocationAssociation = new int[matrixSize];
 	for (int i=0; i< POP_SIZE; i++){
 		*cost=0;
 		/*Random solution*/
 		for(int j=0; j<matrixSize; j++){
-
 			unitAndLocationAssociation[j]= j+1;
 		}
 		std::random_shuffle(&unitAndLocationAssociation[0],&unitAndLocationAssociation[matrixSize]);
 
+		Element element;
+		element.solution = unitAndLocationAssociation;
+		element.cost = evaluateSolution(unitAndLocationAssociation);
 
-		Element *el = new Element(unitAndLocationAssociation,matrixSize);
-		el->Evaluate();
-		population.push_back(*el);
+		population.push_back(element);
 	}
+
+
+
 	int it=1;
 	while(it < 50000){
 
-		//Selection of the fathers
-			//First binary tournament
-		int r =rand() % POP_SIZE;
-		int s =rand() % POP_SIZE;
 
+
+		/* SELECTION */
+
+		//First binary tournament
+		int r = rand() % POP_SIZE;
+		int s = rand() % POP_SIZE;
 		Element firstFather;
 		Element secondFather;
 		if(population.at(r).cost < population.at(s).cost ){
@@ -49,10 +60,10 @@ int * Instance::AGEPMX(int * cost, std::ofstream &outfile ){
 		else{
 			firstFather = population.at(s);
 		}
-		//Second binary tournament
-		r =rand() % POP_SIZE;
-		s =rand() % POP_SIZE;
 
+		//Second binary tournament
+		r = rand() % POP_SIZE;
+		s = rand() % POP_SIZE;
 		if(population.at(r).cost < population.at(s).cost ){
 			secondFather = population.at(r);
 		}
@@ -60,57 +71,72 @@ int * Instance::AGEPMX(int * cost, std::ofstream &outfile ){
 			secondFather = population.at(s);
 		}
 
-		//Crossover
-		std::vector<Element> sons;
-		int* son1;
-		int* son2;
+
+
+		/* CROSSOVER */
+
+		int* solutionSon1;
+		int* solutionSon2;
 		int intervalBegining = 2;
 		int intervalEnd = 4;
 
-		// TODO : calculate probabilityCrossover (if yes -> crossover -> son, if no -> keep the first parent)
-		/*
-		son1 = PMXCrossover(father[], mother[], intervalBegining, intervalEnd);
-		son2 = PMXCrossover(mother[], father[], intervalBegining, intervalEnd);
-		*/
-		son1 = PMXCrossover(firstFather.solution, secondFather.solution, intervalBegining, intervalEnd);
-		son2 = PMXCrossover(secondFather.solution, firstFather.solution, intervalBegining, intervalEnd);
+		double pCrossover = rand() / (double)RAND_MAX; // between 0 and 1
+		if (pCrossover <= PROB_CROSSOVER_STATIONARY) {
+			solutionSon1 = PMXCrossover(firstFather.solution, secondFather.solution, intervalBegining, intervalEnd);
+			solutionSon2 = PMXCrossover(secondFather.solution, firstFather.solution, intervalBegining, intervalEnd);
+		}
+		else {
+			solutionSon1 = firstFather.solution;
+			solutionSon2 = secondFather.solution;
+		}
 
-		//Mutation
-		Element firstSon=sons.at(0);
-		Element secondSon=sons.at(1);
+		Element firstSon;
+		firstSon.solution = solutionSon1;
+		firstSon.cost = evaluateSolution(solutionSon1);
+
+		Element secondSon;
+		secondSon.solution = solutionSon2;
+		secondSon.cost = evaluateSolution(solutionSon2);
+
+
+
+		/* MUTATION */
+
 		for(int i=0; i< POP_SIZE; i++){
 			for (int j=0; j< matrixSize;j++){
-				double random=rand() / (double) RAND_MAX; // between 0 and 1
-				if(random < 0.001*(double)matrixSize){
+				double random = rand() / (double)RAND_MAX; // between 0 and 1
+				if(random < PROB_MUTATION * (double)matrixSize){
 					random = rand() % matrixSize;
 					//Swapping elements in the solution
 					int swap  = population.at(i).solution[j];
 					population.at(i).solution[j]=  population.at(i).solution[(int)random];
 					population.at(i).solution[(int)random]=swap;
 					//Factorization
-					if(population.at(i).eval==false){
-						population.at(i).Evaluate();
-					}else{
+					if (population.at(i).cost == NULL) {
+						population.at(i).cost = evaluateSolution(population.at(i).solution);
+					}
+					else {
 						int mutationCost = population.at(i).cost;
-
-						for(int k=0;k<matrixSize;k++){
-							if(k!=j && k!=random){
-								mutationCost+=flowMatrix[j][k] * (distanceMatrix[population.at(i).solution[(int)random]-1][population.at(i).solution[k]-1] - distanceMatrix[population.at(i).solution[j]-1][population.at(i).solution[k]-1]);
-								mutationCost+=flowMatrix[(int)random][k] * (distanceMatrix[population.at(i).solution[j]-1][population.at(i).solution[k]-1] - distanceMatrix[population.at(i).solution[(int)random]-1][population.at(i).solution[k]-1]);
-								mutationCost+=flowMatrix[k][j] * (distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[(int)random]-1] - distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[j]-1]);
-								mutationCost+=flowMatrix[k][(int)random] * (distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[j]-1] - distanceMatrix[population.at(i).solution[k]-1][population.at(i).solution[(int)random]-1]);
+						for (int k = 0; k < matrixSize; k++) {
+							if (k != j && k != random) {
+								mutationCost += flowMatrix[j][k] * (distanceMatrix[population.at(i).solution[(int)random] - 1][population.at(i).solution[k] - 1] - distanceMatrix[population.at(i).solution[j] - 1][population.at(i).solution[k] - 1]);
+								mutationCost += flowMatrix[(int)random][k] * (distanceMatrix[population.at(i).solution[j] - 1][population.at(i).solution[k] - 1] - distanceMatrix[population.at(i).solution[(int)random] - 1][population.at(i).solution[k] - 1]);
+								mutationCost += flowMatrix[k][j] * (distanceMatrix[population.at(i).solution[k] - 1][population.at(i).solution[(int)random] - 1] - distanceMatrix[population.at(i).solution[k] - 1][population.at(i).solution[j] - 1]);
+								mutationCost += flowMatrix[k][(int)random] * (distanceMatrix[population.at(i).solution[k] - 1][population.at(i).solution[j] - 1] - distanceMatrix[population.at(i).solution[k] - 1][population.at(i).solution[(int)random] - 1]);
 							}
 						}
 						population.at(i).cost = mutationCost;
-						population.at(i).eval=true;
 					}
 					it++;
 				}
 			}
 		}
 
-		//Replacement
-		std::sort (population.begin(),population.end(),comparator);
+
+
+		/* REPLACEMENT */
+
+		std::sort(population.begin(),population.end(), &compareElements);
 		Element worst1 = population.at(POP_SIZE-2);
 		Element worst2 = population.at(POP_SIZE-1);
 		if(firstSon.cost< worst2.cost){
@@ -120,22 +146,44 @@ int * Instance::AGEPMX(int * cost, std::ofstream &outfile ){
 				population.at(POP_SIZE-1)= firstSon;
 			}
 		}
-		std::sort (population.begin(),population.end(), comparator);
+		std::sort (population.begin(),population.end(), &compareElements);
 		worst1 = population.at(POP_SIZE-2);
 		worst2 = population.at(POP_SIZE-1);
 		if(secondSon.cost< worst2.cost){
 			if(secondSon.cost < worst1.cost){
-				population.at(POP_SIZE-2)= secondSon;
+				population.at(POP_SIZE-2) = secondSon;
 			}else{
-				population.at(POP_SIZE-1)= secondSon;
+				population.at(POP_SIZE-1) = secondSon;
 			}
 		}
 	}
-	//Return the best element
-	std::sort (population.begin(),population.end(), comparator);
+
+
+
+	/* RETURN */
+	std::sort(population.begin(),population.end(), &compareElements);
 	*cost= population.at(0).cost;
 	return population.at(0).solution;
+}
 
+
+
+
+/* USEFUL FUNCTIONS */
+
+int Instance::evaluateSolution(int* solution) {
+	//Calculation of the cost of the generated solution
+	int cost = 0;
+	for (int i = 0; i < matrixSize; i++) {
+		for (int j = 0; j < matrixSize; j++) {
+			if (i != j)
+				cost += flowMatrix[i][j] * distanceMatrix[solution[i] - 1][solution[j] - 1];
+		}
+	}
+}
+
+bool Instance::compareElements(Element i, Element j) {
+	return i.cost < j.cost;
 }
 
 
@@ -149,7 +197,7 @@ int* Instance::OXCrossover(int* father, int* mother, int intervalBegining, int i
 	if (1 < intervalSize && intervalSize < matrixSize - 2) {
 
 		/* VARIABLES */
-		int* son;
+		int *son = new int[matrixSize];
 		std::vector<int> fatherIntervalValues;
 		std::vector<int> motherSortedValues;
 		bool* motherMask = new bool[matrixSize];
@@ -203,6 +251,7 @@ int* Instance::OXCrossover(int* father, int* mother, int intervalBegining, int i
 
 	}
 	else {
+		std::cout << "WARNING! The crossover interval is not correct." << std::endl;
 		return NULL;
 	}
 }
@@ -213,7 +262,7 @@ int* Instance::PMXCrossover(int* father, int* mother, int intervalBegining, int 
 	if (1 < intervalSize && intervalSize < matrixSize - 2) {
 
 		/* VARIABLES */
-		int* son;
+		int *son = new int[matrixSize];
 		bool* motherMask = new bool[matrixSize];
 		// Initializing mother mask
 		for (int i = 0; i < matrixSize; i++) {
@@ -232,14 +281,14 @@ int* Instance::PMXCrossover(int* father, int* mother, int intervalBegining, int 
 			// Outside the mother interval (on the left)
 			for (int indexMother = 0; indexMother < intervalBegining; indexMother++) {
 				if (father[indexFather] == mother[indexMother]) {
-					son[indexMother] == mother[indexMother];
+					son[indexMother] = mother[indexMother];
 					break;
 				}
 			}
 			// Outside the mother interval (on the right)
 			for (int indexMother = intervalEnd; indexMother < matrixSize; indexMother++) {
 				if (father[indexFather] == mother[indexMother]) {
-					son[indexMother] == mother[indexMother];
+					son[indexMother] = mother[indexMother];
 					break;
 				}
 			}
@@ -264,14 +313,14 @@ int* Instance::PMXCrossover(int* father, int* mother, int intervalBegining, int 
 			// Outside the mother interval (on the left)
 			for (int indexMother = 0; indexMother < intervalBegining; indexMother++) {
 				if (father[indexFather] == mother[indexMother]) {
-					son[indexMother] == mother[indexMother];
+					son[indexMother] = mother[indexMother];
 					break;
 				}
 			}
 			// Outside the mother interval (on the right)
 			for (int indexMother = intervalEnd; indexMother < matrixSize; indexMother++) {
 				if (father[indexFather] == mother[indexMother]) {
-					son[indexMother] == mother[indexMother];
+					son[indexMother] = mother[indexMother];
 					break;
 				}
 			}
@@ -296,6 +345,7 @@ int* Instance::PMXCrossover(int* father, int* mother, int intervalBegining, int 
 
 	}
 	else {
+		std::cout << "WARNING! The crossover interval is not correct." << std::endl;
 		return NULL;
 	}
 }

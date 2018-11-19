@@ -5,11 +5,12 @@
 #include <algorithm>
 #include <cmath>
 
-#include "Element.h"
+#include "Structures.h"
 #include "FileReader.h"
 #define POP_SIZE 50
-
-class Element;
+#define PROB_CROSSOVER_STATIONARY 1
+#define PROB_CROSSOVER_GENERATIONAL 0.7
+#define PROB_MUTATION 0.001
 
 class Instance {
 
@@ -23,7 +24,8 @@ public:
 	~Instance();
 
 	int * AGEPMX(int * cost,std::ofstream &outfile );
-	static bool comparator(Element i, Element j);
+	int evaluateSolution(int* solution);
+	static bool compareElements(Element i, Element j);
 
 	// Interval : [ intervalBegining ; intervalEnding [
 	int* PMXCrossover(int* father, int* mother, int intervalBegining, int intervalEnding);

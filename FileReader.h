@@ -4,8 +4,7 @@
 #include <vector>
 #include <algorithm>
 
-class FileReader
-{
+class FileReader {
 public:
 	static FileReader *getInstance();
 	void readMatrixFromDataFile(std::string path);
