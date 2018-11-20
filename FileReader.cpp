@@ -1,19 +1,23 @@
 #include "FileReader.h"
 
-// Singleton
 FileReader * FileReader::instance = nullptr;
+
+FileReader::FileReader() {
+	matrixSize = 0;
+	flowMatrix = nullptr;
+	distanceMatrix = nullptr;
+}
+
+FileReader::~FileReader()
+{
+}
+
 
 FileReader * FileReader::getInstance() {
 	if (!instance) {
 		instance = new FileReader();
 	}
 	return instance;
-}
-
-FileReader::FileReader() {
-	matrixSize = 0;
-	flowMatrix = nullptr;
-	distanceMatrix = nullptr;
 }
 
 
@@ -160,9 +164,4 @@ void FileReader::displayMatrices() {
 			std::cout << std::endl;
 		}
 	}
-}
-
-
-FileReader::~FileReader()
-{
 }

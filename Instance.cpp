@@ -1,8 +1,6 @@
 #include "Instance.h"
 
 
-
-
 /* CONSTRUCTOR AND DESTRUCTOR */
 
 Instance::Instance(std::string path) {
@@ -180,6 +178,7 @@ int Instance::evaluateSolution(int* solution) {
 				cost += flowMatrix[i][j] * distanceMatrix[solution[i] - 1][solution[j] - 1];
 		}
 	}
+	return cost;
 }
 
 bool Instance::compareElements(Element i, Element j) {

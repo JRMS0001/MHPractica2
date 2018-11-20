@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -7,6 +9,7 @@
 
 #include "Structures.h"
 #include "FileReader.h"
+
 #define POP_SIZE 50
 #define PROB_CROSSOVER_STATIONARY 1
 #define PROB_CROSSOVER_GENERATIONAL 0.7
