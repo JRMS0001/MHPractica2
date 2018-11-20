@@ -8,20 +8,18 @@
 
 class FileReader {
 public:
-	static FileReader *getInstance();
-	void readMatrixFromDataFile(std::string path);
+	FileReader(std::string path);
+	~FileReader();
+
+	void displayMatrices();
 
 	int getMatrixSize();
 	int** getFlowMatrix();
 	int** getDistanceMatrix();
 
-	~FileReader();
-	size_t split(const std::string &txt, std::vector<std::string> &strs, char ch);
-	void displayMatrices();
-
 private:
-	FileReader();
-	static FileReader *instance;
+	void readMatrixFromDataFile(std::string path);
+	size_t split(const std::string &txt, std::vector<std::string> &strs, char ch);
 	
 	int matrixSize;
 	int** flowMatrix;

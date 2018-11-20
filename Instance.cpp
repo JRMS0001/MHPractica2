@@ -4,10 +4,7 @@
 /* CONSTRUCTOR AND DESTRUCTOR */
 
 Instance::Instance(std::string path) {
-	FileReader::getInstance()->readMatrixFromDataFile(path);
-	flowMatrix = FileReader::getInstance()->getFlowMatrix();
-	distanceMatrix = FileReader::getInstance()->getDistanceMatrix();
-	matrixSize = FileReader::getInstance()->getMatrixSize();
+	matricesFileReader = new FileReader(path);
 }
 
 Instance::~Instance() {
@@ -18,7 +15,10 @@ Instance::~Instance() {
 
 /* GENETICAL ALGORITHMS */
 
-int* Instance::AGEPMX(int * cost, std::ofstream &outfile ){
+int* Instance::AGEPMX(int * cost /*, std::ofstream &outfile */){
+	int** flowMatrix = matricesFileReader->getFlowMatrix();
+	int** distanceMatrix = matricesFileReader->getDistanceMatrix();
+
 	std::vector<Element> population;
 
 	// Generate the random population
@@ -29,7 +29,7 @@ int* Instance::AGEPMX(int * cost, std::ofstream &outfile ){
 		for(int j=0; j<matrixSize; j++){
 			unitAndLocationAssociation[j]= j+1;
 		}
-		std::random_shuffle(&unitAndLocationAssociation[0],&unitAndLocationAssociation[matrixSize]);
+		std::random_shuffle(&unitAndLocationAssociation[0],&unitAndLocationAssociation[matrixSize]); // matrixSize - 1 ?
 
 		Element element;
 		element.solution = unitAndLocationAssociation;
@@ -77,24 +77,25 @@ int* Instance::AGEPMX(int * cost, std::ofstream &outfile ){
 		int* solutionSon2;
 		int intervalBegining = 2;
 		int intervalEnd = 4;
+		
+		Element firstSon;
+		Element secondSon;
 
 		double pCrossover = rand() / (double)RAND_MAX; // between 0 and 1
 		if (pCrossover <= PROB_CROSSOVER_STATIONARY) {
 			solutionSon1 = PMXCrossover(firstFather.solution, secondFather.solution, intervalBegining, intervalEnd);
 			solutionSon2 = PMXCrossover(secondFather.solution, firstFather.solution, intervalBegining, intervalEnd);
+
+			firstSon.solution = solutionSon1;
+			firstSon.cost = evaluateSolution(solutionSon1);
+			secondSon.solution = solutionSon2;
+			secondSon.cost = evaluateSolution(solutionSon2);
 		}
 		else {
-			solutionSon1 = firstFather.solution;
-			solutionSon2 = secondFather.solution;
+			firstSon = firstFather;
+			secondSon = secondFather;
 		}
-
-		Element firstSon;
-		firstSon.solution = solutionSon1;
-		firstSon.cost = evaluateSolution(solutionSon1);
-
-		Element secondSon;
-		secondSon.solution = solutionSon2;
-		secondSon.cost = evaluateSolution(solutionSon2);
+				
 
 
 
@@ -107,7 +108,7 @@ int* Instance::AGEPMX(int * cost, std::ofstream &outfile ){
 					random = rand() % matrixSize;
 					//Swapping elements in the solution
 					int swap  = population.at(i).solution[j];
-					population.at(i).solution[j]=  population.at(i).solution[(int)random];
+					population.at(i).solution[j] =  population.at(i).solution[(int)random];
 					population.at(i).solution[(int)random]=swap;
 					//Factorization
 					if (population.at(i).cost == NULL) {
@@ -137,11 +138,11 @@ int* Instance::AGEPMX(int * cost, std::ofstream &outfile ){
 		std::sort(population.begin(),population.end(), &compareElements);
 		Element worst1 = population.at(POP_SIZE-2);
 		Element worst2 = population.at(POP_SIZE-1);
-		if(firstSon.cost< worst2.cost){
+		if(firstSon.cost < worst2.cost){
 			if(firstSon.cost < worst1.cost){
-				population.at(POP_SIZE-2)= firstSon;
+				population.at(POP_SIZE-2) = firstSon;
 			}else{
-				population.at(POP_SIZE-1)= firstSon;
+				population.at(POP_SIZE-1) = firstSon;
 			}
 		}
 		std::sort (population.begin(),population.end(), &compareElements);
@@ -171,6 +172,9 @@ int* Instance::AGEPMX(int * cost, std::ofstream &outfile ){
 
 int Instance::evaluateSolution(int* solution) {
 	//Calculation of the cost of the generated solution
+	int** flowMatrix = matricesFileReader->getFlowMatrix();
+	int** distanceMatrix = matricesFileReader->getDistanceMatrix();
+
 	int cost = 0;
 	for (int i = 0; i < matrixSize; i++) {
 		for (int j = 0; j < matrixSize; j++) {

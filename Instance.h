@@ -18,15 +18,14 @@
 class Instance {
 
 private:
-	int** flowMatrix;
-	int** distanceMatrix;
 	int matrixSize;
+	FileReader* matricesFileReader;
 	
 public:
 	Instance(std::string path);
 	~Instance();
 
-	int * AGEPMX(int * cost,std::ofstream &outfile );
+	int * AGEPMX(int * cost /*,std::ofstream &outfile */);
 	int evaluateSolution(int* solution);
 	static bool compareElements(Element i, Element j);
 

@@ -1,0 +1,9 @@
+algorithm = AEE
+input = cnf01.dat
+output = cnf01.log cnf01.res
+seed = 0
+individuals = 50
+generationsMax = 300
+crossP = 0.7
+mutP = 0.001
+elite = 1

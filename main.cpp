@@ -1,31 +1,33 @@
 #include <iostream>
+#include <sstream>
 #include <time.h>
 #include "Instance.h"
 #include "FileReader.h"
-using namespace std;
 
 int main(int argc,const char * argv[]) {
 
 	// Temporary //
-	argv[1] = "datos/cnf01.dat";
+	argv[1] = "cnf01.dat";
 	argv[2] = "77374129";
 	// -------- //
 
-	cout << "File:" << argv[1] << endl;
-	cout << "Seed:" << argv[2] << endl;
+	std::cout << "File:" << argv[1] << std::endl;
+	std::cout << "Seed:" << argv[2] << std::endl;
 
 	int cost = 0;
 
-	Instance* instance = new Instance(argv[1]);
+	std::stringstream path;
+	path << "datos/" << argv[1];
+	Instance* instance = new Instance(path.str());
 	std::srand(atoi(argv[2]));
 
 	// AGE PMX
-	ofstream outfile;
-	std::vector<string> v;
-	FileReader::getInstance()->split(argv[1],v,'/');
-	outfile.open("logs/BF" + v.at(1) + argv[2] + ".txt");
+	std::ofstream outfile;
+
+	//outfile.open("logs/BF" + argv[1] + ".txt");
+
 	const clock_t bestFirst_begin_time = clock();
-	instance->AGEPMX(&cost, outfile);
-	std::cout << "Best First execution time: " << float(clock() - bestFirst_begin_time) / CLOCKS_PER_SEC << endl;
+	instance->AGEPMX(&cost /*, outfile*/);
+	std::cout << "Best First execution time: " << float(clock() - bestFirst_begin_time) / CLOCKS_PER_SEC << std::endl;
 	outfile.close();
 }

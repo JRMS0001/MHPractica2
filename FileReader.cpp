@@ -1,23 +1,12 @@
 #include "FileReader.h"
 
-FileReader * FileReader::instance = nullptr;
 
-FileReader::FileReader() {
-	matrixSize = 0;
-	flowMatrix = nullptr;
-	distanceMatrix = nullptr;
+FileReader::FileReader(std::string path) {
+	readMatrixFromDataFile(path);
 }
 
 FileReader::~FileReader()
 {
-}
-
-
-FileReader * FileReader::getInstance() {
-	if (!instance) {
-		instance = new FileReader();
-	}
-	return instance;
 }
 
 
@@ -34,12 +23,13 @@ int** FileReader::getDistanceMatrix() {
 }
 
 void FileReader::readMatrixFromDataFile(std::string path) {
+	matrixSize = 0;
 	flowMatrix = nullptr;
 	distanceMatrix = nullptr;
 
 	std::string line;
 	std::ifstream myfile(path);
-	matrixSize = 0;
+
 	if (myfile.is_open())
 	{
 
