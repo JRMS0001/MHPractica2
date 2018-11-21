@@ -3,16 +3,18 @@
 #include <time.h>
 #include "Instance.h"
 #include "FileReader.h"
+#include "InputsFileReader.h"
 
 int main(int argc,const char * argv[]) {
 
 	// Temporary //
-	argv[1] = "cnf01.dat";
-	argv[2] = "77374129";
+	//argv[1] = "cnf01.dat";
+	//argv[2] = "77374129";
 	// -------- //
+	InputsFileReader *ifl= new InputsFileReader();
 
-	std::cout << "File:" << argv[1] << std::endl;
-	std::cout << "Seed:" << argv[2] << std::endl;
+	std::cout << "File:" << ifl->input << std::endl;
+	std::cout << "Seed:" << ifl->seed << std::endl;
 
 	int cost = 0;
 
