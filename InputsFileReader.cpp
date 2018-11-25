@@ -1,4 +1,5 @@
 #include "InputsFileReader.h"
+#include <algorithm>
 
 
 InputsFileReader::InputsFileReader()

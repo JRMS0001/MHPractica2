@@ -5,6 +5,7 @@
 
 Instance::Instance(std::string path) {
 	matricesFileReader = new FileReader(path);
+	matrixSize = matricesFileReader->getMatrixSize();
 }
 
 Instance::~Instance() {
@@ -42,8 +43,7 @@ int* Instance::AGEPMX(int * cost /*, std::ofstream &outfile */){
 
 	int it=1;
 	while(it < 50000){
-
-
+	std::cout << "Iteration n°" << it << std::endl;
 
 		/* SELECTION */
 
@@ -189,6 +189,13 @@ bool Instance::compareElements(Element i, Element j) {
 	return i.cost < j.cost;
 }
 
+void Instance::displaySolution(int* solution) {
+	for (int i = 0; i < matrixSize; i++) {
+		std::cout << solution[i] << " ";
+	}
+	std::cout << std::endl;
+}
+
 
 
 
@@ -197,7 +204,7 @@ bool Instance::compareElements(Element i, Element j) {
 int* Instance::OXCrossover(int* father, int* mother, int intervalBegining, int intervalEnd) {
 
 	int intervalSize = intervalEnd - intervalBegining;
-	if (1 < intervalSize && intervalSize < matrixSize - 2) {
+	if (1 < intervalSize && intervalSize <= matrixSize - 2) {
 
 		/* VARIABLES */
 		int *son = new int[matrixSize];
@@ -255,6 +262,7 @@ int* Instance::OXCrossover(int* father, int* mother, int intervalBegining, int i
 	}
 	else {
 		std::cout << "WARNING! The crossover interval is not correct." << std::endl;
+		std::cout << "Interval size: " << intervalSize << " and matrix size: " << matrixSize << std::endl;
 		return NULL;
 	}
 }
@@ -262,7 +270,12 @@ int* Instance::OXCrossover(int* father, int* mother, int intervalBegining, int i
 int* Instance::PMXCrossover(int* father, int* mother, int intervalBegining, int intervalEnd){
 
 	int intervalSize = intervalEnd - intervalBegining;
-	if (1 < intervalSize && intervalSize < matrixSize - 2) {
+	if (1 < intervalSize && intervalSize <= matrixSize - 2) {
+
+		std::cout << "Father : ";
+		displaySolution(father);
+		std::cout << "Mother : ";
+		displaySolution(mother);
 
 		/* VARIABLES */
 		int *son = new int[matrixSize];
@@ -303,9 +316,11 @@ int* Instance::PMXCrossover(int* father, int* mother, int intervalBegining, int 
 						for (int i = 0; i < matrixSize; i++) {
 							if (father[indexSon] == mother[i]) {
 								indexSon = i;
+								break;
 							}
 						}
 					}
+					std::cout << "Son's index: " << indexSon << std::endl;
 					son[indexSon] = mother[indexMother];
 					break;
 				}
@@ -335,20 +350,26 @@ int* Instance::PMXCrossover(int* father, int* mother, int intervalBegining, int 
 						for (int i = 0; i < matrixSize; i++) {
 							if (father[indexSon] == mother[i]) {
 								indexSon = i;
+								break;
 							}
 						}
 					}
+					std::cout << "Son's index: " << indexSon << std::endl;
 					son[indexSon] = mother[indexMother];
 					break;
 				}
 			}
 		}
 
+		std::cout << "Son : ";
+		displaySolution(son);
+
 		return son;
 
 	}
 	else {
 		std::cout << "WARNING! The crossover interval is not correct." << std::endl;
+		std::cout << "Interval size: " << intervalSize << " and matrix size: " << matrixSize << std::endl;
 		return NULL;
 	}
 }

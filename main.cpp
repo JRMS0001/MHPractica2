@@ -18,10 +18,10 @@ int main(int argc,const char * argv[]) {
 
 	int cost = 0;
 
-	std::stringstream path;
-	path << "datos/" << argv[1];
-	Instance* instance = new Instance(path.str());
-	std::srand(atoi(argv[2]));
+	std::string path = "";
+	path.append("datos/").append(ifl->input);
+	Instance* instance = new Instance(path);
+	std::srand(ifl->seed);
 
 	// AGE PMX
 	std::ofstream outfile;
@@ -32,4 +32,6 @@ int main(int argc,const char * argv[]) {
 	instance->AGEPMX(&cost /*, outfile*/);
 	std::cout << "Best First execution time: " << float(clock() - bestFirst_begin_time) / CLOCKS_PER_SEC << std::endl;
 	outfile.close();
+
+	system("pause");
 }

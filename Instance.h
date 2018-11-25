@@ -20,6 +20,8 @@ class Instance {
 private:
 	int matrixSize;
 	FileReader* matricesFileReader;
+
+	void displaySolution(int* solution);
 	
 public:
 	Instance(std::string path);
