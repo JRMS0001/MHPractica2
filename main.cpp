@@ -16,22 +16,31 @@ int main(int argc,const char * argv[]) {
 	std::cout << "File:" << ifl->input << std::endl;
 	std::cout << "Seed:" << ifl->seed << std::endl;
 
-	int cost = 0;
 
 	std::string path = "";
 	path.append("datos/").append(ifl->input);
 	Instance* instance = new Instance(path);
 	std::srand(ifl->seed);
 
-	// AGE PMX
-	std::ofstream outfile;
 
+	// Stationary PMX
+	int stationaryCost = 0;
+	std::ofstream stationaryOutfile;
 	//outfile.open("logs/BF" + argv[1] + ".txt");
+	const clock_t stationary_begin_time = clock();
+	//instance->AGEPMX(&stationaryCost /*, stationaryOutfile*/);
+	std::cout << "Stationary execution time: " << float(clock() - stationary_begin_time) / CLOCKS_PER_SEC << std::endl;
+	std::cout << "Stationary cost: " << stationaryCost << std::endl;
+	stationaryOutfile.close();
 
-	const clock_t bestFirst_begin_time = clock();
-	instance->AGEPMX(&cost /*, outfile*/);
-	std::cout << "Best First execution time: " << float(clock() - bestFirst_begin_time) / CLOCKS_PER_SEC << std::endl;
-	outfile.close();
+	// Generational PMX
+	int generationalCost = 0;
+	std::ofstream generationalOutfile;
+	//outfile.open("logs/BF" + argv[1] + ".txt");
+	const clock_t generational_begin_time = clock();
+	instance->AGGPMX(&generationalCost /*, generationalOutfile*/);
+	std::cout << "Generational execution time: " << float(clock() - generational_begin_time) / CLOCKS_PER_SEC << std::endl;
+	generationalOutfile.close();
 
 	system("pause");
 }

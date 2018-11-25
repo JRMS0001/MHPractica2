@@ -28,8 +28,10 @@ public:
 	~Instance();
 
 	int * AGEPMX(int * cost /*,std::ofstream &outfile */);
+	int * AGGPMX(int * cost /*,std::ofstream &outfile */);
 	int evaluateSolution(int* solution);
 	static bool compareElements(Element i, Element j);
+	bool areElementsEquals(Element firstElement, Element secondElement);
 
 	// Interval : [ intervalBegining ; intervalEnding [
 	int* PMXCrossover(int* father, int* mother, int intervalBegining, int intervalEnding);
