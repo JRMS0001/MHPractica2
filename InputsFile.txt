@@ -1,4 +1,5 @@
-algorithm =AEE
+algorithm =AGE
+crossover =PMX
 input =cnf01.dat
 output =cnf01.log cnf01.res
 seed =77374129

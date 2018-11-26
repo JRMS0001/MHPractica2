@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include "Structures.h"
 
 #define INPUTS_FILE_PATH "InputsFile.txt"
 
@@ -12,7 +13,8 @@ public:
 	InputsFileReader();
 	~InputsFileReader();
 
-	std::string algorithm;
+	ALGORITHM algorithm;
+	CROSSOVER crossover;
 	std::string input;
 	std::string outputLog;
 	std::string outputRes;

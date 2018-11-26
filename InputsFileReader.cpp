@@ -20,7 +20,27 @@ void InputsFileReader::readInputsFromDataFile(std::string path) {
 	if (myfile.is_open()){
 		getline(myfile, line);
 		this->split(line,res,'=');
-		algorithm = res.at(1);
+		if (res.at(1) == "AGE") {
+			algorithm = AGE;
+		}
+		else if (res.at(1) == "AGG") {
+			algorithm = AGG;
+		}
+		else {
+
+		}
+
+		getline(myfile, line);
+		this->split(line, res, '=');
+		if (res.at(1) == "PMX") {
+			crossover = PMX;
+		}
+		else if (res.at(1) == "OX") {
+			crossover = OX;
+		}
+		else {
+			
+		}
 
 		getline(myfile, line);
 		this->split(line,res,'=');
@@ -57,9 +77,6 @@ void InputsFileReader::readInputsFromDataFile(std::string path) {
 		this->split(line,res,'=');
 		eliteNumber = stoi(res.at(1));
 	}
-
-
-
 
 }
 

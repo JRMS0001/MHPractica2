@@ -22,13 +22,15 @@ private:
 	FileReader* matricesFileReader;
 
 	void displaySolution(int* solution);
+	void displayPopulationCosts(std::vector<Element> population);
 	
 public:
 	Instance(std::string path);
 	~Instance();
 
-	int * AGEPMX(int * cost /*,std::ofstream &outfile */);
-	int * AGGPMX(int * cost /*,std::ofstream &outfile */);
+	int * AGE(CROSSOVER crossoverType, int * cost /*,std::ofstream &outfile */);
+	int * AGG(CROSSOVER crossoverType, int * cost /*,std::ofstream &outfile */);
+
 	int evaluateSolution(int* solution);
 	static bool compareElements(Element i, Element j);
 	bool areElementsEquals(Element firstElement, Element secondElement);

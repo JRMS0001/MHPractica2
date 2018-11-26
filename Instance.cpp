@@ -14,9 +14,11 @@ Instance::~Instance() {
 
 
 
-/* GENETICAL ALGORITHMS */
 
-int* Instance::AGEPMX(int * cost /*, std::ofstream &outfile */){
+
+/* STATIONARY ALGORITHM */
+
+int* Instance::AGE(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfile */){
 	int** flowMatrix = matricesFileReader->getFlowMatrix();
 	int** distanceMatrix = matricesFileReader->getDistanceMatrix();
 
@@ -73,21 +75,48 @@ int* Instance::AGEPMX(int * cost /*, std::ofstream &outfile */){
 
 		/* CROSSOVER */
 
-		int* solutionSon1;
-		int* solutionSon2;
-		int intervalBegining = 2;
-		int intervalEnd = 4;
-		
 		Element firstSon;
 		Element secondSon;
 
 		double pCrossover = rand() / (double)RAND_MAX; // between 0 and 1
 		if (pCrossover <= PROB_CROSSOVER_STATIONARY) {
-			solutionSon1 = PMXCrossover(firstFather.solution, secondFather.solution, intervalBegining, intervalEnd);
-			solutionSon2 = PMXCrossover(secondFather.solution, firstFather.solution, intervalBegining, intervalEnd);
 
-			//solutionSon1 = OXCrossover(firstFather.solution, secondFather.solution, intervalBegining, intervalEnd);
-			//solutionSon2 = OXCrossover(secondFather.solution, firstFather.solution, intervalBegining, intervalEnd);
+			// Initialization
+			int* solutionSon1;
+			int* solutionSon2;
+			int intervalBegining;
+			int intervalEnd;
+
+			// Choosing interval beginning and end
+			int intervalSize = 0;
+			while (intervalSize <= 1) {
+				int intervalPoint1 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 0 and matrixSize-1
+				int intervalPoint2 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 0 and matrixSize-1
+
+				if (intervalPoint1 < intervalPoint2) {
+					intervalBegining = intervalPoint1;
+					intervalEnd = intervalPoint2;
+				}
+				else {
+					intervalBegining = intervalPoint2;
+					intervalEnd = intervalPoint1;
+				}
+				intervalSize = intervalEnd - intervalBegining;
+			}
+
+			// Crossover
+			if (crossoverType == PMX) {
+				solutionSon1 = PMXCrossover(firstFather.solution, secondFather.solution, intervalBegining, intervalEnd);
+				solutionSon2 = PMXCrossover(secondFather.solution, firstFather.solution, intervalBegining, intervalEnd);
+			}
+			else if (crossoverType == OX) {
+				solutionSon1 = OXCrossover(firstFather.solution, secondFather.solution, intervalBegining, intervalEnd);
+				solutionSon2 = OXCrossover(secondFather.solution, firstFather.solution, intervalBegining, intervalEnd);
+			}
+			else {
+				solutionSon1 = nullptr;
+				solutionSon2 = nullptr;
+			}
 
 			firstSon.solution = solutionSon1;
 			firstSon.cost = evaluateSolution(solutionSon1);
@@ -137,8 +166,8 @@ int* Instance::AGEPMX(int * cost /*, std::ofstream &outfile */){
 
 
 		/* REPLACEMENT */
-
 		std::sort(population.begin(),population.end(), &compareElements);
+
 		std::vector<Element> replacementElements;
 		// 2 worst elements
 		replacementElements.push_back(population.at(POP_SIZE - 2));
@@ -151,9 +180,8 @@ int* Instance::AGEPMX(int * cost /*, std::ofstream &outfile */){
 		population.at(POP_SIZE - 2) = replacementElements.at(0);
 		population.at(POP_SIZE - 1) = replacementElements.at(1);
 
+		std::cout << "Best solution's cost : " << population.at(0).cost << std::endl;
 	}
-
-
 
 	/* RETURN */
 	std::sort(population.begin(),population.end(), &compareElements);
@@ -164,7 +192,11 @@ int* Instance::AGEPMX(int * cost /*, std::ofstream &outfile */){
 
 
 
-int* Instance::AGGPMX(int * cost /*, std::ofstream &outfile */) {
+
+
+/* GENERATIONAL ALGORITHM */
+
+int* Instance::AGG(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfile */) {
 	int** flowMatrix = matricesFileReader->getFlowMatrix();
 	int** distanceMatrix = matricesFileReader->getDistanceMatrix();
 
@@ -198,6 +230,23 @@ int* Instance::AGGPMX(int * cost /*, std::ofstream &outfile */) {
 		Element elite = population.at(0);
 		elite.cost = evaluateSolution(elite.solution);
 
+		std::vector<Element> selectedPopulation;
+		for (int i = 0; i < POP_SIZE; i++) {
+			int r = rand() % POP_SIZE;
+			int s = rand() % POP_SIZE;
+			Element element;
+			if (population.at(r).cost < population.at(s).cost) {
+				element = population.at(r);
+			}
+			else {
+				element = population.at(s);
+			}
+			element.cost = evaluateSolution(element.solution);
+			selectedPopulation.push_back(element);
+		}
+		population = selectedPopulation;
+
+
 
 		/* CROSSOVER */
 
@@ -205,22 +254,49 @@ int* Instance::AGGPMX(int * cost /*, std::ofstream &outfile */) {
 
 		for (int i = 0; i < POP_SIZE; i+=2) {
 
-			int* solutionSon1;
-			int* solutionSon2;
-			int intervalBegining = 2;
-			int intervalEnd = 4;
-
 			Element firstSon;
 			Element secondSon;
 
 			double pCrossover = rand() / (double)RAND_MAX; // between 0 and 1
 			if (pCrossover <= PROB_CROSSOVER_GENERATIONAL) {
-				solutionSon1 = PMXCrossover(population.at(i).solution, population.at(i + 1).solution, intervalBegining, intervalEnd);
-				solutionSon2 = PMXCrossover(population.at(i + 1).solution, population.at(i).solution, intervalBegining, intervalEnd);
 
-				//solutionSon1 = OXCrossover(population.at(i).solution, population.at(i + 1).solution, intervalBegining, intervalEnd);
-				//solutionSon2 = OXCrossover(population.at(i + 1).solution, population.at(i).solution, intervalBegining, intervalEnd);
+				// Initialization
+				int* solutionSon1;
+				int* solutionSon2;
+				int intervalBegining;
+				int intervalEnd;
 
+				// Choosing interval beginning and end
+				int intervalSize = 0;
+				while (intervalSize <= 1) {
+					int intervalPoint1 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 0 and matrixSize-1
+					int intervalPoint2 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 0 and matrixSize-1
+
+					if (intervalPoint1 < intervalPoint2) {
+						intervalBegining = intervalPoint1;
+						intervalEnd = intervalPoint2;
+					}
+					else {
+						intervalBegining = intervalPoint2;
+						intervalEnd = intervalPoint1;
+					}
+					intervalSize = intervalEnd - intervalBegining;
+				}
+
+				// Crossover
+				if (crossoverType == PMX) {
+					solutionSon1 = PMXCrossover(population.at(i).solution, population.at(i + 1).solution, intervalBegining, intervalEnd);
+					solutionSon2 = PMXCrossover(population.at(i + 1).solution, population.at(i).solution, intervalBegining, intervalEnd);
+				}
+				else if (crossoverType == OX) {
+					solutionSon1 = OXCrossover(population.at(i).solution, population.at(i + 1).solution, intervalBegining, intervalEnd);
+					solutionSon2 = OXCrossover(population.at(i + 1).solution, population.at(i).solution, intervalBegining, intervalEnd);
+				}
+				else {
+					solutionSon1 = nullptr;
+					solutionSon2 = nullptr;
+				}
+				
 				firstSon.solution = solutionSon1;
 				firstSon.cost = evaluateSolution(solutionSon1);
 				secondSon.solution = solutionSon2;
@@ -277,10 +353,10 @@ int* Instance::AGGPMX(int * cost /*, std::ofstream &outfile */) {
 
 		std::sort(population.begin(), population.end(), &compareElements);
 
-		if (elite.cost > population.at(0).cost) {
+		if (elite.cost < population.at(0).cost) {
 			population.at(POP_SIZE - 1) = elite;
 		}
-		else if (elite.cost < population.at(POP_SIZE - 1).cost) {
+		else if (elite.cost > population.at(POP_SIZE - 1).cost) {
 			population.at(POP_SIZE - 1) = elite;
 		}
 		else {
@@ -304,6 +380,8 @@ int* Instance::AGGPMX(int * cost /*, std::ofstream &outfile */) {
 				population.at(POP_SIZE - 1) = elite;
 			}
 		}
+
+		std::cout << "Best solution's cost : " << population.at(0).cost << std::endl;
 	}
 
 
@@ -313,6 +391,8 @@ int* Instance::AGGPMX(int * cost /*, std::ofstream &outfile */) {
 	*cost = population.at(0).cost;
 	return population.at(0).solution;
 }
+
+
 
 
 
@@ -356,6 +436,15 @@ void Instance::displaySolution(int* solution) {
 	std::cout << std::endl;
 }
 
+void Instance::displayPopulationCosts(std::vector<Element> population) {
+	for (Element solution : population) {
+		std::cout << "Cost " << solution.cost << std::endl;
+	}
+	std::cout << std::endl;
+}
+
+
+
 
 
 
@@ -364,12 +453,7 @@ void Instance::displaySolution(int* solution) {
 int* Instance::OXCrossover(int* father, int* mother, int intervalBegining, int intervalEnd) {
 
 	int intervalSize = intervalEnd - intervalBegining;
-	if (1 < intervalSize && intervalSize <= matrixSize - 2) {
-
-		std::cout << "Father : ";
-		displaySolution(father);
-		std::cout << "Mother : ";
-		displaySolution(mother);
+	if (intervalBegining >= 2 && intervalEnd <= matrixSize - 2) {
 
 		/* VARIABLES */
 		int *son = new int[matrixSize];
@@ -421,29 +505,24 @@ int* Instance::OXCrossover(int* father, int* mother, int intervalBegining, int i
 			son[i] = motherSortedValues[iterationCounter];
 			iterationCounter++;
 		}
-		
-		std::cout << "Son : ";
-		displaySolution(son);
 
 		return son;
 
 	}
 	else {
 		std::cout << "WARNING! The crossover interval is not correct." << std::endl;
+		std::cout << "Interval beginning: " << intervalBegining << " and interval end: " << intervalEnd << std::endl;
 		std::cout << "Interval size: " << intervalSize << " and matrix size: " << matrixSize << std::endl;
 		return NULL;
 	}
 }
 
+
+
 int* Instance::PMXCrossover(int* father, int* mother, int intervalBegining, int intervalEnd){
 
 	int intervalSize = intervalEnd - intervalBegining;
-	if (1 < intervalSize && intervalSize <= matrixSize - 2) {
-
-		std::cout << "Father : ";
-		displaySolution(father);
-		std::cout << "Mother : ";
-		displaySolution(mother);
+	if (intervalBegining >= 2 && intervalEnd <= matrixSize - 2) {
 
 		/* VARIABLES */
 		int *son = new int[matrixSize];
@@ -488,7 +567,6 @@ int* Instance::PMXCrossover(int* father, int* mother, int intervalBegining, int 
 							}
 						}
 					}
-					std::cout << "Son's index: " << indexSon << std::endl;
 					son[indexSon] = mother[indexMother];
 					break;
 				}
@@ -522,21 +600,18 @@ int* Instance::PMXCrossover(int* father, int* mother, int intervalBegining, int 
 							}
 						}
 					}
-					std::cout << "Son's index: " << indexSon << std::endl;
 					son[indexSon] = mother[indexMother];
 					break;
 				}
 			}
 		}
 
-		std::cout << "Son : ";
-		displaySolution(son);
-
 		return son;
 
 	}
 	else {
 		std::cout << "WARNING! The crossover interval is not correct." << std::endl;
+		std::cout << "Interval beginning: " << intervalBegining << " and interval end: " << intervalEnd << std::endl;
 		std::cout << "Interval size: " << intervalSize << " and matrix size: " << matrixSize << std::endl;
 		return NULL;
 	}
