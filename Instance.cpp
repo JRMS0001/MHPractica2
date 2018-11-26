@@ -90,8 +90,8 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 			// Choosing interval beginning and end
 			int intervalSize = 0;
 			while (intervalSize <= 1) {
-				int intervalPoint1 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 0 and matrixSize-1
-				int intervalPoint2 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 0 and matrixSize-1
+				int intervalPoint1 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 2 and matrixSize-2
+				int intervalPoint2 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 2 and matrixSize-2
 
 				if (intervalPoint1 < intervalPoint2) {
 					intervalBegining = intervalPoint1;
@@ -143,6 +143,8 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 					population.at(i).solution[j] =  population.at(i).solution[(int)random];
 					population.at(i).solution[(int)random]=swap;
 					//Factorization
+					population.at(i).cost = evaluateSolution(population.at(i).solution);
+					/*
 					if (population.at(i).cost == NULL) {
 						population.at(i).cost = evaluateSolution(population.at(i).solution);
 					}
@@ -158,6 +160,7 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 						}
 						population.at(i).cost = mutationCost;
 					}
+					*/
 					it++;
 				}
 			}
@@ -228,7 +231,7 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 		/* SELECTION */
 		std::sort(population.begin(), population.end(), &compareElements);
 		Element elite = population.at(0);
-		elite.cost = evaluateSolution(elite.solution);
+		//elite.cost = evaluateSolution(elite.solution);
 
 		std::vector<Element> selectedPopulation;
 		for (int i = 0; i < POP_SIZE; i++) {
@@ -241,7 +244,7 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 			else {
 				element = population.at(s);
 			}
-			element.cost = evaluateSolution(element.solution);
+			//element.cost = evaluateSolution(element.solution);
 			selectedPopulation.push_back(element);
 		}
 		population = selectedPopulation;
@@ -269,8 +272,8 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 				// Choosing interval beginning and end
 				int intervalSize = 0;
 				while (intervalSize <= 1) {
-					int intervalPoint1 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 0 and matrixSize-1
-					int intervalPoint2 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 0 and matrixSize-1
+					int intervalPoint1 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 2 and matrixSize-2
+					int intervalPoint2 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 2 and matrixSize-2
 
 					if (intervalPoint1 < intervalPoint2) {
 						intervalBegining = intervalPoint1;
@@ -327,6 +330,8 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 					population.at(i).solution[j] = population.at(i).solution[(int)random];
 					population.at(i).solution[(int)random] = swap;
 					//Factorization
+					population.at(i).cost = evaluateSolution(population.at(i).solution);
+					/*
 					if (population.at(i).cost == NULL) {
 						population.at(i).cost = evaluateSolution(population.at(i).solution);
 					}
@@ -342,6 +347,7 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 						}
 						population.at(i).cost = mutationCost;
 					}
+					*/
 					it++;
 				}
 			}
