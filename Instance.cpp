@@ -184,7 +184,7 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost , std::ofstream &outfile 
 		// Display current population costs
 		std::sort(population.begin(), population.end(), &compareElements);
 
-		displayPopulationCosts(population);
+		displayPopulationCosts(population, outfile);
 		outfile << "Best solution's cost : " << population.at(0).cost << std::endl;
 		outfile << std::endl;
 	}
@@ -379,7 +379,7 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost , std::ofstream &outfile 
 		// Display current population costs
 		std::sort(population.begin(), population.end(), &compareElements);
 
-		displayPopulationCosts(population);
+		displayPopulationCosts(population, outfile);
 		outfile << "Best solution's cost : " << population.at(0).cost << std::endl;
 		outfile << std::endl;
 
