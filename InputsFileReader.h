@@ -16,7 +16,7 @@ public:
 	ALGORITHM algorithm;
 	CROSSOVER crossover;
 	std::vector<std::string> inputs;
-	int seed;
+	std::vector<int> seeds;
 	int populationSize;
 	int generationsMax;
 	float probabilityCrossover;

@@ -1,5 +1,6 @@
 #include "InputsFileReader.h"
 #include <algorithm>
+#include <iostream>
 
 
 InputsFileReader::InputsFileReader()
@@ -27,7 +28,7 @@ void InputsFileReader::readInputsFromDataFile(std::string path) {
 			algorithm = AGG;
 		}
 		else {
-
+			std::cout << "WARNING: The algorithm is not supported, only AGE and AGG are";
 		}
 
 		getline(myfile, line);
@@ -39,7 +40,7 @@ void InputsFileReader::readInputsFromDataFile(std::string path) {
 			crossover = OX;
 		}
 		else {
-			
+			std::cout << "WARNING: The crossover is not supported, only PMX and OX are";
 		}
 
 		getline(myfile, line);
@@ -52,7 +53,11 @@ void InputsFileReader::readInputsFromDataFile(std::string path) {
 
 		getline(myfile, line);
 		this->split(line,res,'=');
-		seed = stoi(res.at(1));
+		std::string input_seeds = res.at(1);
+		this->split(input_seeds, res, ' ');
+		for (int i = 0; i < res.size(); i++) {
+			seeds.push_back(stoi(res.at(i)));
+		}
 
 		getline(myfile, line);
 		this->split(line,res,'=');
