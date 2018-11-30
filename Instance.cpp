@@ -90,8 +90,8 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 			// Choosing interval beginning and end
 			int intervalSize = 0;
 			while (intervalSize <= 1) {
-				int intervalPoint1 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 2 and matrixSize-2
-				int intervalPoint2 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 2 and matrixSize-2
+				int intervalPoint1 = (rand() % (matrixSize - 4)) + 2; // Between 2 and matrixSize-2
+				int intervalPoint2 = (rand() % (matrixSize - 4)) + 2; // Between 2 and matrixSize-2
 
 				if (intervalPoint1 < intervalPoint2) {
 					intervalBegining = intervalPoint1;
@@ -120,8 +120,10 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 
 			firstSon.solution = solutionSon1;
 			firstSon.cost = evaluateSolution(solutionSon1);
+			it++;
 			secondSon.solution = solutionSon2;
 			secondSon.cost = evaluateSolution(solutionSon2);
+			it++;
 		}
 		else {
 			firstSon = firstFather;
@@ -132,37 +134,31 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 
 
 		/* MUTATION */
+		for (int gen = 0; gen < matrixSize; gen++) {
+			double pMut = rand() / (double)RAND_MAX; // between 0 and 1
+			if (pMut < PROB_MUTATION * (double)matrixSize) {
+				int random = rand() % matrixSize;
+				//Swapping elements in the solution
+				int swap = firstSon.solution[gen];
+				firstSon.solution[gen] = firstSon.solution[random];
+				firstSon.solution[random] = swap;
+				//Factorization
+				firstSon.cost = evaluateSolution(firstSon.solution);
+				it++;
+			}
+		}
 
-		for(int i=0; i< POP_SIZE; i++){
-			for (int j=0; j< matrixSize;j++){
-				double random = rand() / (double)RAND_MAX; // between 0 and 1
-				if(random < PROB_MUTATION * (double)matrixSize){
-					random = rand() % matrixSize;
-					//Swapping elements in the solution
-					int swap  = population.at(i).solution[j];
-					population.at(i).solution[j] =  population.at(i).solution[(int)random];
-					population.at(i).solution[(int)random]=swap;
-					//Factorization
-					population.at(i).cost = evaluateSolution(population.at(i).solution);
-					/*
-					if (population.at(i).cost == NULL) {
-						population.at(i).cost = evaluateSolution(population.at(i).solution);
-					}
-					else {
-						int mutationCost = population.at(i).cost;
-						for (int k = 0; k < matrixSize; k++) {
-							if (k != j && k != random) {
-								mutationCost += flowMatrix[j][k] * (distanceMatrix[population.at(i).solution[(int)random] - 1][population.at(i).solution[k] - 1] - distanceMatrix[population.at(i).solution[j] - 1][population.at(i).solution[k] - 1]);
-								mutationCost += flowMatrix[(int)random][k] * (distanceMatrix[population.at(i).solution[j] - 1][population.at(i).solution[k] - 1] - distanceMatrix[population.at(i).solution[(int)random] - 1][population.at(i).solution[k] - 1]);
-								mutationCost += flowMatrix[k][j] * (distanceMatrix[population.at(i).solution[k] - 1][population.at(i).solution[(int)random] - 1] - distanceMatrix[population.at(i).solution[k] - 1][population.at(i).solution[j] - 1]);
-								mutationCost += flowMatrix[k][(int)random] * (distanceMatrix[population.at(i).solution[k] - 1][population.at(i).solution[j] - 1] - distanceMatrix[population.at(i).solution[k] - 1][population.at(i).solution[(int)random] - 1]);
-							}
-						}
-						population.at(i).cost = mutationCost;
-					}
-					*/
-					it++;
-				}
+		for (int gen = 0; gen < matrixSize; gen++) {
+			double pMut = rand() / (double)RAND_MAX; // between 0 and 1
+			if (pMut < PROB_MUTATION * (double)matrixSize) {
+				int random = rand() % matrixSize;
+				//Swapping elements in the solution
+				int swap = secondSon.solution[gen];
+				secondSon.solution[gen] = secondSon.solution[random];
+				secondSon.solution[random] = swap;
+				//Factorization
+				secondSon.cost = evaluateSolution(secondSon.solution);
+				it++;
 			}
 		}
 
@@ -183,7 +179,13 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 		population.at(POP_SIZE - 2) = replacementElements.at(0);
 		population.at(POP_SIZE - 1) = replacementElements.at(1);
 
+
+		// Display current population costs
+		std::sort(population.begin(), population.end(), &compareElements);
+
+		displayPopulationCosts(population);
 		std::cout << "Best solution's cost : " << population.at(0).cost << std::endl;
+		std::cout << std::endl;
 	}
 
 	/* RETURN */
@@ -272,8 +274,8 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 				// Choosing interval beginning and end
 				int intervalSize = 0;
 				while (intervalSize <= 1) {
-					int intervalPoint1 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 2 and matrixSize-2
-					int intervalPoint2 = (rand() / (double)RAND_MAX) * (matrixSize - 4) + 2; // Betwenn 2 and matrixSize-2
+					int intervalPoint1 = (rand() % (matrixSize - 4)) + 2; // Between 2 and matrixSize-2
+					int intervalPoint2 = (rand() % (matrixSize - 4)) + 2; // Between 2 and matrixSize-2
 
 					if (intervalPoint1 < intervalPoint2) {
 						intervalBegining = intervalPoint1;
@@ -302,8 +304,10 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 				
 				firstSon.solution = solutionSon1;
 				firstSon.cost = evaluateSolution(solutionSon1);
+				it++;
 				secondSon.solution = solutionSon2;
 				secondSon.cost = evaluateSolution(solutionSon2);
+				it++;
 			}
 			else {
 				firstSon = population.at(i);
@@ -321,33 +325,16 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 		/* MUTATION */
 
 		for (int i = 0; i < POP_SIZE; i++) {
-			for (int j = 0; j < matrixSize; j++) {
-				double random = rand() / (double)RAND_MAX; // between 0 and 1
-				if (random < PROB_MUTATION * (double)matrixSize) {
-					random = rand() % matrixSize;
+			for (int gen = 0; gen < matrixSize; gen++) {
+				double pMut = rand() / (double)RAND_MAX; // between 0 and 1
+				if (pMut < PROB_MUTATION * (double)matrixSize) {
+					int random = rand() % matrixSize;
 					//Swapping elements in the solution
-					int swap = population.at(i).solution[j];
-					population.at(i).solution[j] = population.at(i).solution[(int)random];
-					population.at(i).solution[(int)random] = swap;
+					int swap = population.at(i).solution[gen];
+					population.at(i).solution[gen] = population.at(i).solution[random];
+					population.at(i).solution[random] = swap;
 					//Factorization
 					population.at(i).cost = evaluateSolution(population.at(i).solution);
-					/*
-					if (population.at(i).cost == NULL) {
-						population.at(i).cost = evaluateSolution(population.at(i).solution);
-					}
-					else {
-						int mutationCost = population.at(i).cost;
-						for (int k = 0; k < matrixSize; k++) {
-							if (k != j && k != random) {
-								mutationCost += flowMatrix[j][k] * (distanceMatrix[population.at(i).solution[(int)random] - 1][population.at(i).solution[k] - 1] - distanceMatrix[population.at(i).solution[j] - 1][population.at(i).solution[k] - 1]);
-								mutationCost += flowMatrix[(int)random][k] * (distanceMatrix[population.at(i).solution[j] - 1][population.at(i).solution[k] - 1] - distanceMatrix[population.at(i).solution[(int)random] - 1][population.at(i).solution[k] - 1]);
-								mutationCost += flowMatrix[k][j] * (distanceMatrix[population.at(i).solution[k] - 1][population.at(i).solution[(int)random] - 1] - distanceMatrix[population.at(i).solution[k] - 1][population.at(i).solution[j] - 1]);
-								mutationCost += flowMatrix[k][(int)random] * (distanceMatrix[population.at(i).solution[k] - 1][population.at(i).solution[j] - 1] - distanceMatrix[population.at(i).solution[k] - 1][population.at(i).solution[(int)random] - 1]);
-							}
-						}
-						population.at(i).cost = mutationCost;
-					}
-					*/
 					it++;
 				}
 			}
@@ -387,7 +374,14 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 			}
 		}
 
+		// Display current population costs
+		std::sort(population.begin(), population.end(), &compareElements);
+
+		displayPopulationCosts(population);
 		std::cout << "Best solution's cost : " << population.at(0).cost << std::endl;
+		std::cout << std::endl;
+
+		it++;
 	}
 
 
@@ -413,8 +407,9 @@ int Instance::evaluateSolution(int* solution) {
 	int cost = 0;
 	for (int i = 0; i < matrixSize; i++) {
 		for (int j = 0; j < matrixSize; j++) {
-			if (i != j)
+			if (i != j) {
 				cost += flowMatrix[i][j] * distanceMatrix[solution[i] - 1][solution[j] - 1];
+			}	
 		}
 	}
 	return cost;
