@@ -4,6 +4,7 @@
 /* CONSTRUCTOR AND DESTRUCTOR */
 
 Instance::Instance(std::string path) {
+	inputsFileReader = new InputsFileReader();
 	matricesFileReader = new FileReader(path);
 	matrixSize = matricesFileReader->getMatrixSize();
 }
@@ -26,7 +27,7 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost , std::ofstream &outfile 
 
 	// Generate the random population
 	int* unitAndLocationAssociation = new int[matrixSize];
-	for (int i=0; i< POP_SIZE; i++){
+	for (int i=0; i< inputsFileReader->populationSize; i++){
 		*cost=0;
 		/*Random solution*/
 		for(int j=0; j<matrixSize; j++){
@@ -51,8 +52,8 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost , std::ofstream &outfile 
 		/* SELECTION */
 
 		//First binary tournament
-		int r = rand() % POP_SIZE;
-		int s = rand() % POP_SIZE;
+		int r = rand() % inputsFileReader->populationSize;
+		int s = rand() % inputsFileReader->populationSize;
 		Element firstFather;
 		Element secondFather;
 		if(population.at(r).cost < population.at(s).cost ){
@@ -63,8 +64,8 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost , std::ofstream &outfile 
 		}
 
 		//Second binary tournament
-		r = rand() % POP_SIZE;
-		s = rand() % POP_SIZE;
+		r = rand() % inputsFileReader->populationSize;
+		s = rand() % inputsFileReader->populationSize;
 		if(population.at(r).cost < population.at(s).cost ){
 			secondFather = population.at(r);
 		}
@@ -137,7 +138,7 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost , std::ofstream &outfile 
 		/* MUTATION */
 		for (int gen = 0; gen < matrixSize; gen++) {
 			double pMut = rand() / (double)RAND_MAX; // between 0 and 1
-			if (pMut < PROB_MUTATION * (double)matrixSize) {
+			if (pMut < inputsFileReader->probabilityMutation * (double)matrixSize) {
 				int random = rand() % matrixSize;
 				//Swapping elements in the solution
 				int swap = firstSon.solution[gen];
@@ -151,7 +152,7 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost , std::ofstream &outfile 
 
 		for (int gen = 0; gen < matrixSize; gen++) {
 			double pMut = rand() / (double)RAND_MAX; // between 0 and 1
-			if (pMut < PROB_MUTATION * (double)matrixSize) {
+			if (pMut < inputsFileReader->probabilityMutation * (double)matrixSize) {
 				int random = rand() % matrixSize;
 				//Swapping elements in the solution
 				int swap = secondSon.solution[gen];
@@ -170,15 +171,15 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost , std::ofstream &outfile 
 
 		std::vector<Element> replacementElements;
 		// 2 worst elements
-		replacementElements.push_back(population.at(POP_SIZE - 2));
-		replacementElements.push_back(population.at(POP_SIZE - 1));
+		replacementElements.push_back(population.at(inputsFileReader->populationSize - 2));
+		replacementElements.push_back(population.at(inputsFileReader->populationSize - 1));
 		// 2 new elements
 		replacementElements.push_back(firstSon);
 		replacementElements.push_back(secondSon);
 		// Replacement
 		std::sort(replacementElements.begin(), replacementElements.end(), &compareElements);
-		population.at(POP_SIZE - 2) = replacementElements.at(0);
-		population.at(POP_SIZE - 1) = replacementElements.at(1);
+		population.at(inputsFileReader->populationSize - 2) = replacementElements.at(0);
+		population.at(inputsFileReader->populationSize - 1) = replacementElements.at(1);
 
 
 		// Display current population costs
@@ -210,7 +211,7 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost , std::ofstream &outfile 
 
 	// Generate the random population
 	int* unitAndLocationAssociation = new int[matrixSize];
-	for (int i = 0; i < POP_SIZE; i++) {
+	for (int i = 0; i < inputsFileReader->populationSize; i++) {
 		*cost = 0;
 		/*Random solution*/
 		for (int j = 0; j < matrixSize; j++) {
@@ -238,9 +239,9 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost , std::ofstream &outfile 
 		//elite.cost = evaluateSolution(elite.solution);
 
 		std::vector<Element> selectedPopulation;
-		for (int i = 0; i < POP_SIZE; i++) {
-			int r = rand() % POP_SIZE;
-			int s = rand() % POP_SIZE;
+		for (int i = 0; i < inputsFileReader->populationSize; i++) {
+			int r = rand() % inputsFileReader->populationSize;
+			int s = rand() % inputsFileReader->populationSize;
 			Element element;
 			if (population.at(r).cost < population.at(s).cost) {
 				element = population.at(r);
@@ -259,13 +260,13 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost , std::ofstream &outfile 
 
 		std::vector<Element> crossoveredPopulation;
 
-		for (int i = 0; i < POP_SIZE; i+=2) {
+		for (int i = 0; i < inputsFileReader->populationSize; i+=2) {
 
 			Element firstSon;
 			Element secondSon;
 
 			double pCrossover = rand() / (double)RAND_MAX; // between 0 and 1
-			if (pCrossover <= PROB_CROSSOVER_GENERATIONAL) {
+			if (pCrossover <= inputsFileReader->probabilityCrossover) {
 
 				// Initialization
 				int* solutionSon1;
@@ -326,10 +327,10 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost , std::ofstream &outfile 
 
 		/* MUTATION */
 
-		for (int i = 0; i < POP_SIZE; i++) {
+		for (int i = 0; i < inputsFileReader->populationSize; i++) {
 			for (int gen = 0; gen < matrixSize; gen++) {
 				double pMut = rand() / (double)RAND_MAX; // between 0 and 1
-				if (pMut < PROB_MUTATION * (double)matrixSize) {
+				if (pMut < inputsFileReader->probabilityMutation * (double)matrixSize) {
 					int random = rand() % matrixSize;
 					//Swapping elements in the solution
 					int swap = population.at(i).solution[gen];
@@ -349,15 +350,15 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost , std::ofstream &outfile 
 		std::sort(population.begin(), population.end(), &compareElements);
 
 		if (elite.cost < population.at(0).cost) {
-			population.at(POP_SIZE - 1) = elite;
+			population.at(inputsFileReader->populationSize - 1) = elite;
 		}
-		else if (elite.cost > population.at(POP_SIZE - 1).cost) {
-			population.at(POP_SIZE - 1) = elite;
+		else if (elite.cost > population.at(inputsFileReader->populationSize - 1).cost) {
+			population.at(inputsFileReader->populationSize - 1) = elite;
 		}
 		else {
 			bool containsElite = false;
 			bool costEqualsElite = false;
-			for (int i = 0; i < matrixSize; i++) {
+			for (int i = 0; i < inputsFileReader->populationSize; i++) {
 				if (population.at(i).cost == elite.cost) {
 					costEqualsElite = true;
 					if (areElementsEquals(population.at(i), elite)) {
@@ -372,7 +373,7 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost , std::ofstream &outfile 
 				}
 			}
 			if (!containsElite) {
-				population.at(POP_SIZE - 1) = elite;
+				population.at(inputsFileReader->populationSize - 1) = elite;
 			}
 		}
 

@@ -9,17 +9,16 @@
 
 #include "Structures.h"
 #include "FileReader.h"
+#include "InputsFileReader.h"
 
-#define POP_SIZE 50
 #define PROB_CROSSOVER_STATIONARY 1
-#define PROB_CROSSOVER_GENERATIONAL 0.7
-#define PROB_MUTATION 0.001
 
 class Instance {
 
 private:
 	int matrixSize;
 	FileReader* matricesFileReader;
+	InputsFileReader* inputsFileReader;
 
 	void displaySolution(int* solution);
 	void displayPopulationCosts(std::vector<Element> population, std::ofstream &outfile);
