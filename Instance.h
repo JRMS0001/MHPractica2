@@ -22,14 +22,14 @@ private:
 	FileReader* matricesFileReader;
 
 	void displaySolution(int* solution);
-	void displayPopulationCosts(std::vector<Element> population);
+	void displayPopulationCosts(std::vector<Element> population, std::ofstream &outfile);
 	
 public:
 	Instance(std::string path);
 	~Instance();
 
-	int * AGE(CROSSOVER crossoverType, int * cost /*,std::ofstream &outfile */);
-	int * AGG(CROSSOVER crossoverType, int * cost /*,std::ofstream &outfile */);
+	int * AGE(CROSSOVER crossoverType, int * cost ,std::ofstream &outfile );
+	int * AGG(CROSSOVER crossoverType, int * cost ,std::ofstream &outfile );
 
 	int evaluateSolution(int* solution);
 	static bool compareElements(Element i, Element j);

@@ -18,7 +18,7 @@ Instance::~Instance() {
 
 /* STATIONARY ALGORITHM */
 
-int* Instance::AGE(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfile */){
+int* Instance::AGE(CROSSOVER crossoverType, int * cost , std::ofstream &outfile ){
 	int** flowMatrix = matricesFileReader->getFlowMatrix();
 	int** distanceMatrix = matricesFileReader->getDistanceMatrix();
 
@@ -40,12 +40,13 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 
 		population.push_back(element);
 	}
-
+	std::sort(population.begin(),population.end(), &compareElements);
+	outfile << "Best cost of the initial population: " << population.at(0).cost << std::endl;
 
 
 	int it=1;
 	while(it < 50000){
-	std::cout << "Iteration n°" << it << std::endl;
+	outfile << "Iteration n°" << it << std::endl;
 
 		/* SELECTION */
 
@@ -184,8 +185,8 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 		std::sort(population.begin(), population.end(), &compareElements);
 
 		displayPopulationCosts(population);
-		std::cout << "Best solution's cost : " << population.at(0).cost << std::endl;
-		std::cout << std::endl;
+		outfile << "Best solution's cost : " << population.at(0).cost << std::endl;
+		outfile << std::endl;
 	}
 
 	/* RETURN */
@@ -201,7 +202,7 @@ int* Instance::AGE(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 
 /* GENERATIONAL ALGORITHM */
 
-int* Instance::AGG(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfile */) {
+int* Instance::AGG(CROSSOVER crossoverType, int * cost , std::ofstream &outfile ) {
 	int** flowMatrix = matricesFileReader->getFlowMatrix();
 	int** distanceMatrix = matricesFileReader->getDistanceMatrix();
 
@@ -223,12 +224,13 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 
 		population.push_back(element);
 	}
-
+	std::sort(population.begin(),population.end(), &compareElements);
+	outfile << "Best cost of the initial population: " << population.at(0).cost << std::endl;
 
 
 	int it = 1;
 	while (it < 50000) {
-		std::cout << "Iteration n°" << it << std::endl;
+		outfile << "Iteration n°" << it << std::endl;
 
 		/* SELECTION */
 		std::sort(population.begin(), population.end(), &compareElements);
@@ -378,8 +380,8 @@ int* Instance::AGG(CROSSOVER crossoverType, int * cost /*, std::ofstream &outfil
 		std::sort(population.begin(), population.end(), &compareElements);
 
 		displayPopulationCosts(population);
-		std::cout << "Best solution's cost : " << population.at(0).cost << std::endl;
-		std::cout << std::endl;
+		outfile << "Best solution's cost : " << population.at(0).cost << std::endl;
+		outfile << std::endl;
 
 		it++;
 	}
@@ -437,11 +439,11 @@ void Instance::displaySolution(int* solution) {
 	std::cout << std::endl;
 }
 
-void Instance::displayPopulationCosts(std::vector<Element> population) {
+void Instance::displayPopulationCosts(std::vector<Element> population, std::ofstream &outfile) {
 	for (Element solution : population) {
-		std::cout << "Cost " << solution.cost << std::endl;
+		outfile << "Cost " << solution.cost << std::endl;
 	}
-	std::cout << std::endl;
+	outfile << std::endl;
 }
 
 
