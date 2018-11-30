@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <time.h>
+#include <string>
 #include "Instance.h"
 #include "FileReader.h"
 #include "InputsFileReader.h"
@@ -20,8 +21,7 @@ int main(int argc,const char * argv[]) {
 		std::cout << "Executing Stationary algorithm." << std::endl;
 		int stationaryCost = 0;
 		std::ofstream stationaryOutfile;
-		std::string seed = ""+ ifl->seed; 
-		stationaryOutfile.open("logs/AGE" + ifl->input +seed+".txt");
+		stationaryOutfile.open("logs/AGE" + ifl->input +std::to_string(ifl->seed)+".txt");
 		const clock_t stationary_begin_time = clock();
 		instance->AGE(ifl->crossover, &stationaryCost , stationaryOutfile);
 		std::cout << "Stationary execution time: " << float(clock() - stationary_begin_time) / CLOCKS_PER_SEC << std::endl;
@@ -31,11 +31,10 @@ int main(int argc,const char * argv[]) {
 
 	// Generational
 	else if (ifl->algorithm == AGG) {
-		std::cout << "Executing Stationary algorithm." << std::endl;
+		std::cout << "Executing Generational algorithm." << std::endl;
 		int generationalCost = 0;
 		std::ofstream generationalOutfile;
-		std::string seed = ""+ ifl->seed; 
-		generationalOutfile.open("logs/AGG" + ifl->input + seed+".txt");
+		generationalOutfile.open("logs/AGG" + ifl->input + std::to_string(ifl->seed)+".txt");
 		const clock_t generational_begin_time = clock();
 		instance->AGG(ifl->crossover, &generationalCost , generationalOutfile);
 		std::cout << "Generational execution time: " << float(clock() - generational_begin_time) / CLOCKS_PER_SEC << std::endl;
