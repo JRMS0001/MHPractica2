@@ -25,7 +25,10 @@ int main(int argc,const char * argv[]) {
 			std::cout << "Executing Stationary algorithm." << std::endl;
 			int stationaryCost = 0;
 			std::ofstream stationaryOutfile;
-			stationaryOutfile.open("logs/AGE" + input + std::to_string(ifl->seed) + ".log");
+			if(ifl->crossover == OX)
+				stationaryOutfile.open("logs/AGEOX" + input + std::to_string(ifl->seed) + ".log");
+			else
+				stationaryOutfile.open("logs/AGEPMX" + input + std::to_string(ifl->seed) + ".log");
 			const clock_t stationary_begin_time = clock();
 			instance->AGE(ifl->crossover, &stationaryCost, stationaryOutfile);
 			std::cout << "Stationary execution time: " << float(clock() - stationary_begin_time) / CLOCKS_PER_SEC << std::endl;
@@ -38,11 +41,14 @@ int main(int argc,const char * argv[]) {
 			std::cout << "Executing Generational algorithm." << std::endl;
 			int generationalCost = 0;
 			std::ofstream generationalOutfile;
-			generationalOutfile.open("logs/AGG" + input + std::to_string(ifl->seed) + ".log");
+			if(ifl->crossover == OX)
+				generationalOutfile.open("logs/AGEOX" + input + std::to_string(ifl->seed) + ".log");
+			else
+				generationalOutfile.open("logs/AGEPMX" + input + std::to_string(ifl->seed) + ".log");
 			const clock_t generational_begin_time = clock();
 			instance->AGG(ifl->crossover, &generationalCost, generationalOutfile);
 			std::cout << "Generational execution time: " << float(clock() - generational_begin_time) / CLOCKS_PER_SEC << std::endl;
-			std::cout << "Stationary cost: " << generationalCost << std::endl;
+			std::cout << "Generational cost: " << generationalCost << std::endl;
 			generationalOutfile.close();
 		}
 	}
