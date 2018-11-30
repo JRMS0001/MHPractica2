@@ -43,15 +43,12 @@ void InputsFileReader::readInputsFromDataFile(std::string path) {
 		}
 
 		getline(myfile, line);
-		this->split(line,res,'=');
-		input = res.at(1);
-
-		getline(myfile, line);
-		this->split(line,res,'=');
-		std::string output= res.at(1);
-		this->split(output,res,' ');
-		this->outputLog=res.at(0);
-		this->outputRes=res.at(1);
+		this->split(line, res, '=');
+		std::string input = res.at(1);
+		this->split(input, res, ' ');
+		for (int i = 0; i < res.size(); i++) {
+			inputs.push_back(res.at(i));
+		}
 
 		getline(myfile, line);
 		this->split(line,res,'=');

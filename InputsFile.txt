@@ -1,7 +1,6 @@
 algorithm =AGE
 crossover =OX
-input =cnf01.dat
-output =cnf01.log cnf01.res
+inputs =cnf01.dat cnf02.dat
 seed =77374129
 individuals =50
 generationsMax =300
